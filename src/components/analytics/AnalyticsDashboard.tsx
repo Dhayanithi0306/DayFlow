@@ -6,7 +6,7 @@ import {
 } from 'recharts';
 
 export const AnalyticsDashboard: React.FC = () => {
-  const [attendance, setAttendance] = useState<AttendanceReport | null>(null);
+  const [, setAttendance] = useState<AttendanceReport | null>(null);
   const [leave, setLeave] = useState<LeaveReport | null>(null);
   const [employee, setEmployee] = useState<EmployeeReport | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -110,7 +110,7 @@ export const AnalyticsDashboard: React.FC = () => {
                   paddingAngle={5}
                   dataKey="value"
                 >
-                  {leaveDataChart.map((entry, index) => (
+                  {leaveDataChart.map((_entry, index) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>

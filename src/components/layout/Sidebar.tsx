@@ -1,7 +1,7 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { Home, Users, Calendar, Clock, DollarSign, FileText, PieChart, LogOut, Settings } from 'lucide-react';
+import { Home, Users, Calendar, Clock, DollarSign, FileText, PieChart } from 'lucide-react';
 
 export const Sidebar: React.FC = () => {
   const { user, switchRole } = useAuth();
