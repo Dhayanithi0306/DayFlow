@@ -10,7 +10,8 @@ import { EmployeeDashboard } from '../pages/employee/Dashboard';
 import { EmployeeProfilePage } from '../pages/employee/Profile';
 import { EmployeeAttendancePage } from '../pages/employee/Attendance';
 import { EmployeeLeavePage } from '../pages/employee/Leave';
-import { FeaturePlaceholder } from '../pages/employee/FeaturePlaceholder';
+import { EmployeePayrollPage } from '../pages/employee/Payroll';
+import { SalarySlipPage } from '../pages/employee/SalarySlip';
 import { DashboardLayout } from '../layouts/DashboardLayout';
 import { ProtectedRoute } from './ProtectedRoute';
 import { useAuth } from '../context/AuthContext';
@@ -53,7 +54,8 @@ export const router = createBrowserRouter([
       { path: 'profile', element: <EmployeeProfilePage /> },
       { path: 'attendance', element: <EmployeeAttendancePage /> },
       { path: 'leave', element: <EmployeeLeavePage /> },
-      { path: 'payroll', element: <FeaturePlaceholder /> },
+      { path: 'payroll', element: <EmployeePayrollPage /> },
+      { path: 'payroll/:id/slip', element: <SalarySlipPage /> },
     ],
   },
   {
