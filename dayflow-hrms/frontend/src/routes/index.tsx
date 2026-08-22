@@ -1,5 +1,6 @@
 import { createBrowserRouter } from 'react-router-dom';
 import { MainLayout } from '../layouts/MainLayout';
+import { AppLayout } from '../layouts/AppLayout';
 import { Home } from '../pages/Home';
 import { Login } from '../pages/Login';
 import { Signup } from '../pages/Signup';
@@ -8,10 +9,12 @@ import { ForgotPassword } from '../pages/ForgotPassword';
 import { ResetPassword } from '../pages/ResetPassword';
 import { ChangePassword } from '../pages/ChangePassword';
 import { Unauthorized } from '../pages/Unauthorized';
+import { NotFound } from '../pages/NotFound';
 import { PlaceholderPage } from '../pages/PlaceholderPage';
 import { ProtectedRoute } from '../components/ProtectedRoute';
 
 export const router = createBrowserRouter([
+  // Public & Auth Routes (rendered with minimal header via MainLayout)
   {
     path: '/',
     element: <MainLayout />,
@@ -52,69 +55,89 @@ export const router = createBrowserRouter([
         path: 'unauthorized',
         element: <Unauthorized />,
       },
+    ],
+  },
+
+  // Authenticated Employee Portal Routes (rendered within full AppLayout shell)
+  {
+    path: '/employee',
+    element: (
+      <ProtectedRoute allowedRoles={['EMPLOYEE', 'ADMIN']}>
+        <AppLayout />
+      </ProtectedRoute>
+    ),
+    children: [
       {
-        path: 'employee',
-        element: (
-          <ProtectedRoute allowedRoles={['EMPLOYEE', 'ADMIN']}>
-            <PlaceholderPage title="Employee Portal" />
-          </ProtectedRoute>
-        ),
-        children: [
-          {
-            path: 'dashboard',
-            element: <PlaceholderPage title="Employee Dashboard" />,
-          },
-          {
-            path: 'profile',
-            element: <PlaceholderPage title="Employee Profile Management" />,
-          },
-          {
-            path: 'attendance',
-            element: <PlaceholderPage title="Employee Attendance & Check-in" />,
-          },
-          {
-            path: 'time-off',
-            element: <PlaceholderPage title="Employee Time Off & Leave Requests" />,
-          },
-          {
-            path: 'payroll',
-            element: <PlaceholderPage title="Employee Salary & Payroll Slips" />,
-          },
-        ],
+        index: true,
+        element: <PlaceholderPage title="Employee Self-Service Portal" />,
       },
       {
-        path: 'admin',
-        element: (
-          <ProtectedRoute allowedRoles={['ADMIN']}>
-            <PlaceholderPage title="Admin Portal" />
-          </ProtectedRoute>
-        ),
-        children: [
-          {
-            path: 'dashboard',
-            element: <PlaceholderPage title="Admin Overview & Analytics Dashboard" />,
-          },
-          {
-            path: 'employees',
-            element: <PlaceholderPage title="Admin Employee Directory Management" />,
-          },
-          {
-            path: 'attendance',
-            element: <PlaceholderPage title="Admin Attendance Monitoring" />,
-          },
-          {
-            path: 'time-off',
-            element: <PlaceholderPage title="Admin Time Off Request Approvals" />,
-          },
-          {
-            path: 'payroll',
-            element: <PlaceholderPage title="Admin Payroll & Salary Processing" />,
-          },
-        ],
+        path: 'dashboard',
+        element: <PlaceholderPage title="Employee Dashboard" />,
       },
+      {
+        path: 'profile',
+        element: <PlaceholderPage title="Employee Profile Management" />,
+      },
+      {
+        path: 'attendance',
+        element: <PlaceholderPage title="Employee Attendance & Check-in" />,
+      },
+      {
+        path: 'time-off',
+        element: <PlaceholderPage title="Employee Time Off & Leave Requests" />,
+      },
+      {
+        path: 'payroll',
+        element: <PlaceholderPage title="Employee Salary & Payroll Slips" />,
+      },
+    ],
+  },
+
+  // Authenticated Admin Portal Routes (rendered within full AppLayout shell)
+  {
+    path: '/admin',
+    element: (
+      <ProtectedRoute allowedRoles={['ADMIN']}>
+        <AppLayout />
+      </ProtectedRoute>
+    ),
+    children: [
+      {
+        index: true,
+        element: <PlaceholderPage title="Admin & HR Management Portal" />,
+      },
+      {
+        path: 'dashboard',
+        element: <PlaceholderPage title="Admin Overview & Analytics Dashboard" />,
+      },
+      {
+        path: 'employees',
+        element: <PlaceholderPage title="Admin Employee Directory Management" />,
+      },
+      {
+        path: 'attendance',
+        element: <PlaceholderPage title="Admin Attendance Monitoring" />,
+      },
+      {
+        path: 'time-off',
+        element: <PlaceholderPage title="Admin Time Off Request Approvals" />,
+      },
+      {
+        path: 'payroll',
+        element: <PlaceholderPage title="Admin Payroll & Salary Processing" />,
+      },
+    ],
+  },
+
+  // Wildcard 404 Route
+  {
+    path: '*',
+    element: <MainLayout />,
+    children: [
       {
         path: '*',
-        element: <PlaceholderPage title="404 — Page Not Found" />,
+        element: <NotFound />,
       },
     ],
   },
