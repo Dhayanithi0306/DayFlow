@@ -11,7 +11,7 @@ export const Button = ({ children, isLoading, loadingText, disabled, ...props }:
       {isLoading ? (
         <>
           <span className="spinner" aria-hidden="true"></span>
-          {loadingText || 'Loading...'}
+          {loadingText || 'Signing in...'}
         </>
       ) : (
         children
