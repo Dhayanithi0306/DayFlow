@@ -27,3 +27,12 @@ export const formatDate = (isoString?: string | Date | null): string => {
   if (isNaN(date.getTime())) return '--';
   return date.toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' });
 };
+
+/**
+ * Formats monetary amounts safely with currency symbol (e.g. ₹75,000.00)
+ */
+export const formatCurrency = (amount?: number | string | null, currency = 'INR'): string => {
+  const num = Number(amount || 0);
+  const symbol = currency === 'INR' ? '₹' : '$';
+  return `${symbol}${num.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+};

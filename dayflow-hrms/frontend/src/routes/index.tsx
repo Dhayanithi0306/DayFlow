@@ -10,7 +10,6 @@ import { ResetPassword } from '../pages/ResetPassword';
 import { ChangePassword } from '../pages/ChangePassword';
 import { Unauthorized } from '../pages/Unauthorized';
 import { NotFound } from '../pages/NotFound';
-import { PlaceholderPage } from '../pages/PlaceholderPage';
 import { ProtectedRoute } from '../components/ProtectedRoute';
 
 // Real Employee Pages
@@ -18,12 +17,14 @@ import { EmployeeDashboard } from '../pages/employee/EmployeeDashboard';
 import { EmployeeProfile } from '../pages/employee/EmployeeProfile';
 import { EmployeeAttendance } from '../pages/employee/EmployeeAttendance';
 import { EmployeeTimeOff } from '../pages/employee/EmployeeTimeOff';
+import { EmployeePayroll } from '../pages/employee/EmployeePayroll';
 
 // Real Admin Pages
 import { EmployeeDirectory } from '../pages/admin/EmployeeDirectory';
 import { EmployeeDetails } from '../pages/admin/EmployeeDetails';
 import { AdminAttendance } from '../pages/admin/AdminAttendance';
 import { AdminTimeOff } from '../pages/admin/AdminTimeOff';
+import { AdminPayroll } from '../pages/admin/AdminPayroll';
 
 export const router = createBrowserRouter([
   // Public & Auth Routes (rendered with minimal header via MainLayout)
@@ -101,7 +102,7 @@ export const router = createBrowserRouter([
       },
       {
         path: 'payroll',
-        element: <PlaceholderPage title="Employee Salary & Payroll Slips (Coming in Stage 8)" />,
+        element: <EmployeePayroll />,
       },
     ],
   },
@@ -141,7 +142,7 @@ export const router = createBrowserRouter([
       },
       {
         path: 'payroll',
-        element: <PlaceholderPage title="Admin Payroll & Salary Processing (Coming in Stage 8)" />,
+        element: <AdminPayroll />,
       },
     ],
   },

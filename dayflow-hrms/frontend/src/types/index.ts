@@ -143,6 +143,74 @@ export interface LeaveRequest {
   } | null;
 }
 
+export interface SalaryStructure {
+  id: string;
+  employeeId: string;
+  basicSalary: number | string;
+  hra: number | string;
+  standardAllowance: number | string;
+  performanceBonus: number | string;
+  leaveTravelAllowance: number | string;
+  fixedAllowance: number | string;
+  providentFund: number | string;
+  professionalTax: number | string;
+  currency: string;
+  effectiveFrom: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ComputedSalaryTotals {
+  basicSalary: string;
+  hra: string;
+  standardAllowance: string;
+  performanceBonus: string;
+  leaveTravelAllowance: string;
+  fixedAllowance: string;
+  providentFund: string;
+  professionalTax: string;
+  grossSalary: string;
+  totalDeductions: string;
+  netSalary: string;
+}
+
+export interface Payslip {
+  id: string;
+  payrollRecordId: string;
+  fileUrl: string;
+  generatedAt: string;
+}
+
+export interface PayrollRecord {
+  id: string;
+  employeeId: string;
+  salaryStructureId: string;
+  payPeriodStart: string;
+  payPeriodEnd: string;
+  grossSalary: number | string;
+  totalDeductions: number | string;
+  netSalary: number | string;
+  workingDays: number;
+  presentDays: number;
+  leaveDays: number;
+  absentDays: number;
+  generatedAt: string;
+  createdAt: string;
+  updatedAt: string;
+  employee?: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    employeeId: string;
+    profilePictureUrl?: string | null;
+    department?: {
+      id: string;
+      name: string;
+    } | null;
+  } | null;
+  payslip?: Payslip | null;
+}
+
 export interface AuthState {
   user: User | null;
   token: string | null;
