@@ -83,6 +83,31 @@ export interface Employee {
   updatedAt: string;
 }
 
+export interface Attendance {
+  id: string;
+  employeeId: string;
+  date: string;
+  checkIn?: string | null;
+  checkOut?: string | null;
+  workingMinutes?: number | null;
+  extraMinutes?: number | null;
+  status: AttendanceStatus;
+  remarks?: string | null;
+  createdAt?: string;
+  updatedAt?: string;
+  employee?: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    employeeId: string;
+    profilePictureUrl?: string | null;
+    department?: {
+      id: string;
+      name: string;
+    } | null;
+  } | null;
+}
+
 export interface AuthState {
   user: User | null;
   token: string | null;

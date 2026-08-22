@@ -16,10 +16,12 @@ import { ProtectedRoute } from '../components/ProtectedRoute';
 // Real Employee Pages
 import { EmployeeDashboard } from '../pages/employee/EmployeeDashboard';
 import { EmployeeProfile } from '../pages/employee/EmployeeProfile';
+import { EmployeeAttendance } from '../pages/employee/EmployeeAttendance';
 
 // Real Admin Pages
 import { EmployeeDirectory } from '../pages/admin/EmployeeDirectory';
 import { EmployeeDetails } from '../pages/admin/EmployeeDetails';
+import { AdminAttendance } from '../pages/admin/AdminAttendance';
 
 export const router = createBrowserRouter([
   // Public & Auth Routes (rendered with minimal header via MainLayout)
@@ -89,7 +91,7 @@ export const router = createBrowserRouter([
       },
       {
         path: 'attendance',
-        element: <PlaceholderPage title="Employee Attendance & Check-in (Coming in Stage 6)" />,
+        element: <EmployeeAttendance />,
       },
       {
         path: 'time-off',
@@ -129,7 +131,7 @@ export const router = createBrowserRouter([
       },
       {
         path: 'attendance',
-        element: <PlaceholderPage title="Admin Attendance Monitoring (Coming in Stage 6)" />,
+        element: <AdminAttendance />,
       },
       {
         path: 'time-off',
