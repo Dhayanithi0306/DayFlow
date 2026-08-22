@@ -34,6 +34,7 @@ public class AuthService {
         }
 
         Employee employee = new Employee();
+        employee.setName(request.getName());
         employee.setEmployeeId(request.getEmployeeId());
         employee.setEmail(request.getEmail());
         employee.setPassword(hashPassword(request.getPassword()));

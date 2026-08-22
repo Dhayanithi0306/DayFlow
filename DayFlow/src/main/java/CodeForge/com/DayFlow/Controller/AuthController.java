@@ -1,4 +1,4 @@
-package CodeForge.com.DayFlow.Controller;
+package CodeForge.com.DayFlow.controller;
 
 import CodeForge.com.DayFlow.dto.AuthResponse;
 import CodeForge.com.DayFlow.dto.SignInRequest;

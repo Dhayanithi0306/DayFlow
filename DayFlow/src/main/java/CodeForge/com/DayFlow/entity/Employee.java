@@ -31,4 +31,10 @@ public class Employee {
 
     @Column(nullable = false)
     private boolean isEmailVerified = false;
+
+    @Column(nullable = false)
+    private String name;
+
+    @Column(nullable = true)
+    private String profileImageUrl;
 }
