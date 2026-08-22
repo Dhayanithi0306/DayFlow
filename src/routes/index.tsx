@@ -9,6 +9,7 @@ import { AdminDashboard } from '../pages/dashboard/Placeholders';
 import { EmployeeDashboard } from '../pages/employee/Dashboard';
 import { EmployeeProfilePage } from '../pages/employee/Profile';
 import { EmployeeAttendancePage } from '../pages/employee/Attendance';
+import { EmployeeLeavePage } from '../pages/employee/Leave';
 import { FeaturePlaceholder } from '../pages/employee/FeaturePlaceholder';
 import { DashboardLayout } from '../layouts/DashboardLayout';
 import { ProtectedRoute } from './ProtectedRoute';
@@ -51,7 +52,7 @@ export const router = createBrowserRouter([
       { path: 'dashboard', element: <EmployeeDashboard /> },
       { path: 'profile', element: <EmployeeProfilePage /> },
       { path: 'attendance', element: <EmployeeAttendancePage /> },
-      { path: 'leave', element: <FeaturePlaceholder /> },
+      { path: 'leave', element: <EmployeeLeavePage /> },
       { path: 'payroll', element: <FeaturePlaceholder /> },
     ],
   },
