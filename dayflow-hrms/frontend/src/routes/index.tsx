@@ -1,7 +1,15 @@
 import { createBrowserRouter } from 'react-router-dom';
 import { MainLayout } from '../layouts/MainLayout';
 import { Home } from '../pages/Home';
+import { Login } from '../pages/Login';
+import { Signup } from '../pages/Signup';
+import { VerifyEmail } from '../pages/VerifyEmail';
+import { ForgotPassword } from '../pages/ForgotPassword';
+import { ResetPassword } from '../pages/ResetPassword';
+import { ChangePassword } from '../pages/ChangePassword';
+import { Unauthorized } from '../pages/Unauthorized';
 import { PlaceholderPage } from '../pages/PlaceholderPage';
+import { ProtectedRoute } from '../components/ProtectedRoute';
 
 export const router = createBrowserRouter([
   {
@@ -14,19 +22,44 @@ export const router = createBrowserRouter([
       },
       {
         path: 'login',
-        element: <PlaceholderPage title="User Login" />,
+        element: <Login />,
       },
       {
         path: 'signup',
-        element: <PlaceholderPage title="User Registration (Signup)" />,
+        element: <Signup />,
+      },
+      {
+        path: 'verify-email',
+        element: <VerifyEmail />,
+      },
+      {
+        path: 'forgot-password',
+        element: <ForgotPassword />,
+      },
+      {
+        path: 'reset-password',
+        element: <ResetPassword />,
+      },
+      {
+        path: 'change-password',
+        element: (
+          <ProtectedRoute>
+            <ChangePassword />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'unauthorized',
+        element: <Unauthorized />,
       },
       {
         path: 'employee',
+        element: (
+          <ProtectedRoute allowedRoles={['EMPLOYEE', 'ADMIN']}>
+            <PlaceholderPage title="Employee Portal" />
+          </ProtectedRoute>
+        ),
         children: [
-          {
-            index: true,
-            element: <PlaceholderPage title="Employee Self-Service Portal" />,
-          },
           {
             path: 'dashboard',
             element: <PlaceholderPage title="Employee Dashboard" />,
@@ -51,11 +84,12 @@ export const router = createBrowserRouter([
       },
       {
         path: 'admin',
+        element: (
+          <ProtectedRoute allowedRoles={['ADMIN']}>
+            <PlaceholderPage title="Admin Portal" />
+          </ProtectedRoute>
+        ),
         children: [
-          {
-            index: true,
-            element: <PlaceholderPage title="Admin & HR Management Portal" />,
-          },
           {
             path: 'dashboard',
             element: <PlaceholderPage title="Admin Overview & Analytics Dashboard" />,
