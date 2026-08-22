@@ -8,6 +8,7 @@ import { ResetPassword } from '../pages/auth/ResetPassword';
 import { AdminDashboard } from '../pages/dashboard/Placeholders';
 import { EmployeeDashboard } from '../pages/employee/Dashboard';
 import { EmployeeProfilePage } from '../pages/employee/Profile';
+import { EmployeeAttendancePage } from '../pages/employee/Attendance';
 import { FeaturePlaceholder } from '../pages/employee/FeaturePlaceholder';
 import { DashboardLayout } from '../layouts/DashboardLayout';
 import { ProtectedRoute } from './ProtectedRoute';
@@ -49,7 +50,7 @@ export const router = createBrowserRouter([
     children: [
       { path: 'dashboard', element: <EmployeeDashboard /> },
       { path: 'profile', element: <EmployeeProfilePage /> },
-      { path: 'attendance', element: <FeaturePlaceholder /> },
+      { path: 'attendance', element: <EmployeeAttendancePage /> },
       { path: 'leave', element: <FeaturePlaceholder /> },
       { path: 'payroll', element: <FeaturePlaceholder /> },
     ],
