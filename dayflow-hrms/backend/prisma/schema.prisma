@@ -1,0 +1,16 @@
+// This is your Prisma schema file for DAYFLOW HRMS
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Initial minimal model for Stage 1 connection verification
+model SystemHealth {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+}
