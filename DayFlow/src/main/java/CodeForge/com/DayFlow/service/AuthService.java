@@ -42,7 +42,8 @@ public class AuthService {
 
         employeeRepository.save(employee);
 
-        return new AuthResponse(true, "Sign up successful. Please verify your email.", employee.getEmployeeId(), employee.getRole().name(), null);
+        String token = jwtUtil.generateToken(employee.getEmployeeId(), employee.getRole().name());
+        return new AuthResponse(true, "Sign up successful.", employee.getEmployeeId(), employee.getRole().name(), token);
     }
 
     public AuthResponse signIn(SignInRequest request) {

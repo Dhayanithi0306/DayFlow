@@ -46,4 +46,11 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         }
     }
+
+    @PostMapping("/logout")
+    public ResponseEntity<AuthResponse> logout(@RequestHeader(value = "Authorization", required = false) String token) {
+        // Note: With stateless JWTs, true logout is handled by the client discarding the token.
+        // For strict server-side logout, we would add the token to a blacklist database table here.
+        return ResponseEntity.ok(new AuthResponse(true, "Logout successful. Please delete your token on the client side.", null, null, null));
+    }
 }
