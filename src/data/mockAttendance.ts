@@ -1,3 +1,5 @@
+import { globalAttendanceRecords } from './mockAdminAttendance';
+
 export type AttendanceStatus = 'Present' | 'Absent' | 'Half-day' | 'Leave' | 'Not Checked In';
 
 export interface DailyAttendance {
@@ -11,64 +13,10 @@ export interface DailyAttendance {
   isoDate: string; // for easier sorting/filtering
 }
 
-const generateMockHistory = (): DailyAttendance[] => {
-  const history: DailyAttendance[] = [];
-  const today = new Date();
-  
-  for (let i = 1; i <= 14; i++) {
-    const d = new Date(today);
-    d.setDate(today.getDate() - i);
-    
-    // Skip weekends for mock data
-    if (d.getDay() === 0 || d.getDay() === 6) continue;
-    
-    let status: AttendanceStatus = 'Present';
-    let checkIn: string | null = '09:00 AM';
-    let checkOut: string | null = '06:00 PM';
-    let workingHours: string | null = '9h 00m';
-    
-    // Randomize some statuses
-    const rand = Math.random();
-    if (rand < 0.1) {
-      status = 'Absent';
-      checkIn = null;
-      checkOut = null;
-      workingHours = null;
-    } else if (rand < 0.2) {
-      status = 'Leave';
-      checkIn = null;
-      checkOut = null;
-      workingHours = null;
-    } else if (rand < 0.3) {
-      status = 'Half-day';
-      checkIn = '09:00 AM';
-      checkOut = '01:00 PM';
-      workingHours = '4h 00m';
-    } else {
-      // Vary times slightly for Present
-      const inMinute = Math.floor(Math.random() * 15);
-      const outMinute = Math.floor(Math.random() * 30);
-      checkIn = `09:${inMinute.toString().padStart(2, '0')} AM`;
-      checkOut = `06:${outMinute.toString().padStart(2, '0')} PM`;
-      workingHours = `8h ${(60 - inMinute + outMinute) % 60}m`;
-    }
+// EMP001 is the mock employee profile
+const MY_EMP_ID = 'EMP001';
 
-    history.push({
-      id: `att_${i}`,
-      date: d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-      day: d.toLocaleDateString('en-US', { weekday: 'short' }),
-      status,
-      checkIn,
-      checkOut,
-      workingHours,
-      isoDate: d.toISOString()
-    });
-  }
-  
-  return history.sort((a, b) => new Date(b.isoDate).getTime() - new Date(a.isoDate).getTime());
-};
-
-// Initial state
+// Initial state for today
 export let mockTodayAttendance: DailyAttendance = {
   id: 'att_today',
   date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
@@ -80,46 +28,87 @@ export let mockTodayAttendance: DailyAttendance = {
   isoDate: new Date().toISOString()
 };
 
-export let mockAttendanceHistory = generateMockHistory();
-
 export const attendanceService = {
   getDailyAttendance: () => {
+    // If today is already in global records for EMP001, return it. Otherwise return the default today state.
+    const todayStr = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    const globalToday = globalAttendanceRecords.find(r => r.employeeId === MY_EMP_ID && r.date === todayStr);
+    if (globalToday) {
+      mockTodayAttendance = {
+        id: globalToday.id,
+        date: globalToday.date,
+        day: globalToday.day,
+        status: globalToday.status,
+        checkIn: globalToday.checkIn,
+        checkOut: globalToday.checkOut,
+        workingHours: globalToday.workingHours,
+        isoDate: globalToday.isoDate
+      };
+    }
     return { ...mockTodayAttendance };
   },
   
   getWeeklyAttendance: () => {
-    // Return last 5 entries from history + today if applicable
-    const thisWeek = [mockTodayAttendance, ...mockAttendanceHistory].slice(0, 5);
-    // Sort chronological for weekly view
-    return thisWeek.sort((a, b) => new Date(a.isoDate).getTime() - new Date(b.isoDate).getTime());
+    const history = globalAttendanceRecords
+      .filter(r => r.employeeId === MY_EMP_ID)
+      .sort((a, b) => new Date(b.isoDate).getTime() - new Date(a.isoDate).getTime());
+    
+    // Check if today is in history, if not, add it for the employee view
+    const todayStr = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    let week = [...history];
+    if (!week.find(r => r.date === todayStr)) {
+       week = [{
+         ...mockTodayAttendance,
+         employeeId: MY_EMP_ID,
+         employeeName: 'Sarah Jenkins',
+         department: 'Engineering',
+         designation: 'Senior Frontend Engineer'
+       }, ...week];
+    }
+    return week.slice(0, 5).sort((a, b) => new Date(a.isoDate).getTime() - new Date(b.isoDate).getTime());
   },
   
   getHistory: () => {
-    return [...mockAttendanceHistory];
+    return globalAttendanceRecords
+      .filter(r => r.employeeId === MY_EMP_ID)
+      .sort((a, b) => new Date(b.isoDate).getTime() - new Date(a.isoDate).getTime());
   },
 
   checkIn: () => {
     const now = new Date();
     const timeString = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+    const todayStr = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    
     mockTodayAttendance = {
       ...mockTodayAttendance,
       status: 'Present',
       checkIn: timeString
     };
+
+    // Update global record
+    const globalIndex = globalAttendanceRecords.findIndex(r => r.employeeId === MY_EMP_ID && r.date === todayStr);
+    if (globalIndex !== -1) {
+      globalAttendanceRecords[globalIndex] = { ...globalAttendanceRecords[globalIndex], ...mockTodayAttendance };
+    } else {
+      globalAttendanceRecords.unshift({
+        ...mockTodayAttendance,
+        employeeId: MY_EMP_ID,
+        employeeName: 'Sarah Jenkins',
+        department: 'Engineering',
+        designation: 'Senior Frontend Engineer'
+      });
+    }
+
     return { ...mockTodayAttendance };
   },
 
   checkOut: (checkInTime: string) => {
     const now = new Date();
     const timeString = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
-    
-    // Simple mock calculation for working hours
-    // Assuming checkInTime is like "09:00 AM" and now is later the same day
-    // For a real app, you'd parse dates properly. Here we just mock it nicely.
+    const todayStr = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
     
     let workingHours = 'Working...';
     try {
-      // Rough mock calculation based on frontend time diff
       const start = new Date();
       const match = checkInTime.match(/(\d+):(\d+)\s+(AM|PM)/);
       if (match) {
@@ -136,11 +125,11 @@ export const attendanceService = {
           const diffMins = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
           workingHours = `${diffHrs}h ${diffMins}m`;
         } else {
-          workingHours = '0h 1m'; // Just checked in
+          workingHours = '0h 1m'; 
         }
       }
     } catch(e) {
-      workingHours = '8h 00m'; // Fallback
+      workingHours = '8h 00m'; 
     }
 
     mockTodayAttendance = {
@@ -149,7 +138,11 @@ export const attendanceService = {
       workingHours
     };
     
-    // In a real app we'd add to history, but for this mock we just update today's state
+    const globalIndex = globalAttendanceRecords.findIndex(r => r.employeeId === MY_EMP_ID && r.date === todayStr);
+    if (globalIndex !== -1) {
+      globalAttendanceRecords[globalIndex] = { ...globalAttendanceRecords[globalIndex], ...mockTodayAttendance };
+    }
+    
     return { ...mockTodayAttendance };
   }
 };

@@ -1,11 +1,9 @@
-import { createBrowserRouter, Navigate } from 'react-router-dom';
-import { AuthLayout } from '../layouts/AuthLayout';
-import { Login } from '../pages/auth/Login';
-import { Signup } from '../pages/auth/Signup';
-import { VerifyEmail } from '../pages/auth/VerifyEmail';
-import { ForgotPassword } from '../pages/auth/ForgotPassword';
-import { ResetPassword } from '../pages/auth/ResetPassword';
 import { AdminDashboard } from '../pages/admin/Dashboard';
+import { AdminAttendance } from '../pages/admin/Attendance';
+import { AdminLeaveRequests } from '../pages/admin/LeaveRequests';
+import { AdminPayroll } from '../pages/admin/Payroll';
+import { AdminReports } from '../pages/admin/Reports';
+import { AdminAnalytics } from '../pages/admin/Analytics';
 import { EmployeeDashboard } from '../pages/employee/Dashboard';
 import { EmployeeProfilePage } from '../pages/employee/Profile';
 import { EmployeeAttendancePage } from '../pages/employee/Attendance';
@@ -17,6 +15,13 @@ import { DashboardLayout } from '../layouts/DashboardLayout';
 import { ProtectedRoute } from './ProtectedRoute';
 import { useAuth } from '../context/AuthContext';
 import { NotFound } from '../pages/NotFound';
+import { Login } from '../pages/auth/Login';
+import { Signup } from '../pages/auth/Signup';
+import { VerifyEmail } from '../pages/auth/VerifyEmail';
+import { ForgotPassword } from '../pages/auth/ForgotPassword';
+import { ResetPassword } from '../pages/auth/ResetPassword';
+import { AuthLayout } from '../layouts/AuthLayout';
+import { Navigate, createBrowserRouter } from 'react-router-dom';
 
 // Simple wrapper to redirect already logged in users away from auth pages
 const AuthRoute = ({ children }: { children: React.ReactNode }) => {
@@ -69,11 +74,11 @@ export const router = createBrowserRouter([
     children: [
       { path: 'dashboard', element: <AdminDashboard /> },
       { path: 'employees', element: <FeaturePlaceholder /> },
-      { path: 'attendance', element: <FeaturePlaceholder /> },
-      { path: 'leave-requests', element: <FeaturePlaceholder /> },
-      { path: 'payroll', element: <FeaturePlaceholder /> },
-      { path: 'reports', element: <FeaturePlaceholder /> },
-      { path: 'analytics', element: <FeaturePlaceholder /> },
+      { path: 'attendance', element: <AdminAttendance /> },
+      { path: 'leave-requests', element: <AdminLeaveRequests /> },
+      { path: 'payroll', element: <AdminPayroll /> },
+      { path: 'reports', element: <AdminReports /> },
+      { path: 'analytics', element: <AdminAnalytics /> },
     ],
   },
   {

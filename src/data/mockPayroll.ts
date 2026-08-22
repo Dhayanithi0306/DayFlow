@@ -1,3 +1,5 @@
+import { adminService } from './mockAdmin';
+
 export type PaymentStatus = 'Paid' | 'Processing' | 'Pending';
 
 export interface SalaryBreakdown {
@@ -11,6 +13,10 @@ export interface SalaryBreakdown {
 
 export interface PayrollRecord {
   id: string;
+  employeeId: string;
+  employeeName: string;
+  department: string;
+  designation: string;
   payPeriod: string;
   paymentDate: string;
   status: PaymentStatus;
@@ -21,64 +27,132 @@ export interface PayrollRecord {
   isoDate: string;
 }
 
-// Generate historical mock data
-const generateMockHistory = (): PayrollRecord[] => {
+// Generate historical mock data across all employees
+const generateGlobalMockHistory = (): PayrollRecord[] => {
   const history: PayrollRecord[] = [];
-  const baseSalary = {
-    basic: 40000,
-    hra: 8000,
-    allowances: 5000,
-    bonus: 2000,
-    tax: 4000,
-    otherDeductions: 1000
-  };
-
+  const employees = adminService.getEmployees();
+  
   const months = ['August', 'July', 'June', 'May', 'April', 'March'];
   
-  months.forEach((month, index) => {
-    // Slightly vary the bonus for older months to make data look real
-    const currentBonus = index === 0 ? 2000 : index % 2 === 0 ? 1500 : 2500;
-    const gross = baseSalary.basic + baseSalary.hra + baseSalary.allowances + currentBonus;
-    const deds = baseSalary.tax + baseSalary.otherDeductions;
-    const net = gross - deds;
+  employees.forEach(emp => {
+    // Determine a base salary loosely based on department/role
+    let basic = 40000;
+    if (emp.department === 'Engineering') basic = 60000;
+    else if (emp.department === 'Design') basic = 45000;
+    else if (emp.department === 'Marketing') basic = 35000;
+    
+    // Adjust slightly for this specific employee to make data look real
+    const hash = emp.name.charCodeAt(0) * 1000;
+    basic = basic + hash;
 
-    let status: PaymentStatus = 'Paid';
-    if (index === 0 && new Date().getDate() < 25) {
-      status = 'Processing'; // Mock logic: current month might be processing
-    }
+    const hra = Math.round(basic * 0.2);
+    const allowances = 5000;
+    const tax = Math.round(basic * 0.1);
+    const otherDeductions = 1000;
 
-    history.push({
-      id: `pr_2026_${month.toLowerCase()}`,
-      payPeriod: `${month} 2026`,
-      paymentDate: `25 ${month.substring(0, 3)} 2026`,
-      status,
-      breakdown: {
-        ...baseSalary,
-        bonus: currentBonus
-      },
-      grossSalary: gross,
-      totalDeductions: deds,
-      netSalary: net,
-      isoDate: `2026-${String(8 - index).padStart(2, '0')}-01T00:00:00.000Z`
+    months.forEach((month, index) => {
+      // Slightly vary the bonus
+      const currentBonus = index === 0 ? 2000 : index % 2 === 0 ? 1500 : 2500;
+      const gross = basic + hra + allowances + currentBonus;
+      const deds = tax + otherDeductions;
+      const net = gross - deds;
+
+      let status: PaymentStatus = 'Paid';
+      if (index === 0) {
+        status = 'Pending'; // Mock logic: current month is pending
+      }
+
+      history.push({
+        id: `pr_${emp.id}_2026_${month.toLowerCase()}`,
+        employeeId: emp.id,
+        employeeName: emp.name,
+        department: emp.department,
+        designation: emp.designation,
+        payPeriod: `${month} 2026`,
+        paymentDate: `25 ${month.substring(0, 3)} 2026`,
+        status,
+        breakdown: {
+          basic,
+          hra,
+          allowances,
+          bonus: currentBonus,
+          tax,
+          otherDeductions
+        },
+        grossSalary: gross,
+        totalDeductions: deds,
+        netSalary: net,
+        isoDate: `2026-${String(8 - index).padStart(2, '0')}-01T00:00:00.000Z`
+      });
     });
   });
 
   return history;
 };
 
-export const mockPayrollHistory = generateMockHistory();
+// Mutable singleton state
+export let globalPayrollRecords = generateGlobalMockHistory();
 
 export const payrollService = {
+  // --- EMPLOYEE METHODS ---
   getMyPayroll: () => {
-    // Return the latest payroll record
-    return { ...mockPayrollHistory[0] };
+    // Return the latest payroll record for EMP001
+    const myHistory = payrollService.getPayrollHistory('EMP001');
+    return { ...myHistory[0] };
   },
   
-  getPayrollHistory: () => {
-    return [...mockPayrollHistory].sort((a, b) => new Date(b.isoDate).getTime() - new Date(a.isoDate).getTime());
+  getPayrollHistory: (employeeId = 'EMP001') => {
+    return globalPayrollRecords
+      .filter(r => r.employeeId === employeeId)
+      .sort((a, b) => new Date(b.isoDate).getTime() - new Date(a.isoDate).getTime());
   },
   
   getPayrollById: (id: string) => {
-    return mockPayrollHistory.find(pr => pr.id === id) || null;
+    return globalPayrollRecords.find(pr => pr.id === id) || null;
+  },
+
+  // --- ADMIN METHODS ---
+  getAllPayrollRecords: (payPeriod?: string) => {
+    let records = [...globalPayrollRecords];
+    if (payPeriod) {
+      records = records.filter(r => r.payPeriod === payPeriod);
+    }
+    return records.sort((a, b) => a.employeeName.localeCompare(b.employeeName));
+  },
+
+  getPayrollSummary: (payPeriod: string) => {
+    const records = globalPayrollRecords.filter(r => r.payPeriod === payPeriod);
+    const totalEmployees = records.length;
+    const totalGross = records.reduce((sum, r) => sum + r.grossSalary, 0);
+    const totalDeductions = records.reduce((sum, r) => sum + r.totalDeductions, 0);
+    const totalNet = records.reduce((sum, r) => sum + r.netSalary, 0);
+    
+    return {
+      totalEmployees,
+      totalGross,
+      totalDeductions,
+      totalNet
+    };
+  },
+
+  updatePayroll: (id: string, breakdown: SalaryBreakdown, status?: PaymentStatus) => {
+    const idx = globalPayrollRecords.findIndex(r => r.id === id);
+    if (idx !== -1) {
+      const gross = breakdown.basic + breakdown.hra + breakdown.allowances + breakdown.bonus;
+      const deds = breakdown.tax + breakdown.otherDeductions;
+      const net = gross - deds;
+
+      globalPayrollRecords[idx] = {
+        ...globalPayrollRecords[idx],
+        breakdown,
+        grossSalary: gross,
+        totalDeductions: deds,
+        netSalary: net,
+        status: status || globalPayrollRecords[idx].status
+      };
+      
+      // Update the reference so React state recognizes the change if spread
+      globalPayrollRecords = [...globalPayrollRecords];
+    }
   }
 };

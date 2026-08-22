@@ -306,6 +306,9 @@ export const AdminDashboard: React.FC = () => {
               <Button variant="outline" className="justify-start text-xs font-medium" onClick={() => navigate('/admin/payroll')}>
                 <Banknote className="w-4 h-4 mr-2 text-emerald-600" /> Run Payroll
               </Button>
+              <Button variant="outline" className="justify-start text-xs font-medium col-span-2" onClick={() => navigate('/admin/analytics')}>
+                <Activity className="w-4 h-4 mr-2 text-blue-600" /> View Analytics
+              </Button>
             </div>
           </div>
 
