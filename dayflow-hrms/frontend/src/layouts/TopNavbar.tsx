@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useNotifications } from '../context/NotificationContext';
+import { searchService, GlobalSearchResults } from '../services/searchService';
 import { Avatar } from '../components/common/Avatar';
 import { Modal } from '../components/common/Modal';
 import { Badge } from '../components/common/Badge';
@@ -16,6 +17,11 @@ import {
   ChevronDown,
   Inbox,
   CheckCheck,
+  Users,
+  Clock,
+  CalendarDays,
+  Wallet,
+  X,
 } from 'lucide-react';
 
 export interface TopNavbarProps {
@@ -29,6 +35,48 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({ onMenuClick }) => {
 
   const [menuOpen, setMenuOpen] = useState<boolean>(false);
   const [notificationsOpen, setNotificationsOpen] = useState<boolean>(false);
+
+  // Global Search state
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [searchResults, setSearchResults] = useState<GlobalSearchResults | null>(null);
+  const [searchOpen, setSearchOpen] = useState<boolean>(false);
+  const [searchLoading, setSearchLoading] = useState<boolean>(false);
+  const searchRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handler = setTimeout(async () => {
+      if (searchQuery.trim().length >= 2) {
+        setSearchLoading(true);
+        try {
+          const res = await searchService.globalSearch(searchQuery);
+          if (res.success && res.data?.results) {
+            setSearchResults(res.data.results);
+            setSearchOpen(true);
+          }
+        } catch (err) {
+          console.error('Search error:', err);
+        } finally {
+          setSearchLoading(false);
+        }
+      } else {
+        setSearchResults(null);
+        setSearchOpen(false);
+      }
+    }, 300);
+
+    return () => clearTimeout(handler);
+  }, [searchQuery]);
+
+  // Click outside to close search popover
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+        setSearchOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const handleOpenNotifications = () => {
     fetchNotifications();
@@ -53,6 +101,13 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({ onMenuClick }) => {
     ? `${user.employee.firstName} ${user.employee.lastName}`
     : user?.email || 'User';
 
+  const hasResults =
+    searchResults &&
+    (searchResults.employees.length > 0 ||
+      searchResults.attendance.length > 0 ||
+      searchResults.leave.length > 0 ||
+      searchResults.payroll.length > 0);
+
   return (
     <header className="bg-white border-b border-slate-200 sticky top-0 z-20 h-16 flex items-center px-4 sm:px-6 justify-between shadow-xs">
       {/* Left: Mobile Menu Toggle & Search */}
@@ -64,14 +119,132 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({ onMenuClick }) => {
           <Menu size={20} />
         </button>
 
-        {/* Global Search Input */}
-        <div className="relative hidden sm:block max-w-xs w-64">
+        {/* Global Live Search Input */}
+        <div ref={searchRef} className="relative hidden sm:block max-w-sm w-72">
           <Search size={16} className="absolute left-3 top-2.5 text-slate-400 pointer-events-none" />
           <input
             type="text"
-            placeholder="Search HRMS portal..."
-            className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-4 py-1.5 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:bg-white transition-all"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search employees, attendance, leave..."
+            className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-8 py-1.5 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:bg-white transition-all"
           />
+          {searchQuery && (
+            <button
+              onClick={() => {
+                setSearchQuery('');
+                setSearchOpen(false);
+              }}
+              className="absolute right-2.5 top-2.5 text-slate-400 hover:text-slate-600"
+            >
+              <X size={14} />
+            </button>
+          )}
+
+          {/* Search Popover Results */}
+          {searchOpen && (
+            <div className="absolute left-0 mt-2 w-96 bg-white border border-slate-200 rounded-2xl shadow-xl z-30 p-3 space-y-3 max-h-96 overflow-y-auto animate-in fade-in duration-100">
+              {searchLoading ? (
+                <p className="text-xs text-slate-400 text-center py-4">Searching database...</p>
+              ) : !hasResults ? (
+                <p className="text-xs text-slate-400 text-center py-4">No matching records found.</p>
+              ) : (
+                <>
+                  {/* Employee Category */}
+                  {searchResults.employees.length > 0 && (
+                    <div className="space-y-1">
+                      <span className="text-[10px] uppercase font-bold text-slate-400 flex items-center gap-1">
+                        <Users size={12} /> Employees
+                      </span>
+                      {searchResults.employees.map((e) => (
+                        <div
+                          key={e.id}
+                          onClick={() => {
+                            setSearchOpen(false);
+                            setSearchQuery('');
+                            navigate(`/admin/employees/${e.id}`);
+                          }}
+                          className="p-2 hover:bg-indigo-50 rounded-xl cursor-pointer text-xs flex items-center justify-between"
+                        >
+                          <span className="font-semibold text-slate-800">{e.firstName} {e.lastName}</span>
+                          <span className="font-mono text-[10px] text-indigo-600">{e.employeeId}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Attendance Category */}
+                  {searchResults.attendance.length > 0 && (
+                    <div className="space-y-1">
+                      <span className="text-[10px] uppercase font-bold text-slate-400 flex items-center gap-1">
+                        <Clock size={12} /> Attendance Records
+                      </span>
+                      {searchResults.attendance.map((a) => (
+                        <div
+                          key={a.id}
+                          onClick={() => {
+                            setSearchOpen(false);
+                            setSearchQuery('');
+                            navigate(user?.role === 'ADMIN' ? '/admin/attendance' : '/employee/attendance');
+                          }}
+                          className="p-2 hover:bg-indigo-50 rounded-xl cursor-pointer text-xs flex items-center justify-between"
+                        >
+                          <span className="text-slate-700">{formatDate(a.date)} — {a.status}</span>
+                          <span className="text-[10px] text-slate-400 font-mono">{a.remarks || 'Recorded'}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Leave Category */}
+                  {searchResults.leave.length > 0 && (
+                    <div className="space-y-1">
+                      <span className="text-[10px] uppercase font-bold text-slate-400 flex items-center gap-1">
+                        <CalendarDays size={12} /> Leave Applications
+                      </span>
+                      {searchResults.leave.map((l) => (
+                        <div
+                          key={l.id}
+                          onClick={() => {
+                            setSearchOpen(false);
+                            setSearchQuery('');
+                            navigate(user?.role === 'ADMIN' ? '/admin/time-off' : '/employee/time-off');
+                          }}
+                          className="p-2 hover:bg-indigo-50 rounded-xl cursor-pointer text-xs flex items-center justify-between"
+                        >
+                          <span className="text-slate-700">{l.leaveType} LEAVE ({l.duration}d)</span>
+                          <span className="text-[10px] font-bold text-indigo-700">{l.status}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Payroll Category */}
+                  {searchResults.payroll.length > 0 && (
+                    <div className="space-y-1">
+                      <span className="text-[10px] uppercase font-bold text-slate-400 flex items-center gap-1">
+                        <Wallet size={12} /> Payroll Records
+                      </span>
+                      {searchResults.payroll.map((p) => (
+                        <div
+                          key={p.id}
+                          onClick={() => {
+                            setSearchOpen(false);
+                            setSearchQuery('');
+                            navigate(user?.role === 'ADMIN' ? '/admin/payroll' : '/employee/payroll');
+                          }}
+                          className="p-2 hover:bg-indigo-50 rounded-xl cursor-pointer text-xs flex items-center justify-between"
+                        >
+                          <span className="text-slate-700">Period: {formatDate(p.payPeriodStart)}</span>
+                          <span className="text-[10px] font-mono font-bold text-emerald-700">Net: ₹{p.netSalary}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+          )}
         </div>
       </div>
 

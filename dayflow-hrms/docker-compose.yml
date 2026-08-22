@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database Container
+  postgres:
+    image: postgres:16-alpine
+    container_name: dayflow-postgres
+    restart: always
+    environment:
+      POSTGRES_USER: dayflow_user
+      POSTGRES_PASSWORD: dayflow_secure_password_2026
+      POSTGRES_DB: dayflow_hrms
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dayflow_user -d dayflow_hrms"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Express Node.js Backend API Service Container
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: dayflow-backend
+    restart: always
+    environment:
+      PORT: 5000
+      NODE_ENV: production
+      DATABASE_URL: "postgresql://dayflow_user:dayflow_secure_password_2026@postgres:5432/dayflow_hrms?schema=public"
+      JWT_SECRET: "dayflow-production-jwt-secret-key-2026-super-secure"
+      JWT_EXPIRES_IN: "7d"
+      FRONTEND_URL: "http://localhost"
+    ports:
+      - "5000:5000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # React Vite Nginx Frontend Service Container
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: dayflow-frontend
+    restart: always
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:

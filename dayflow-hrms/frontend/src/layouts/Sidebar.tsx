@@ -9,6 +9,8 @@ import {
   CalendarDays,
   CreditCard,
   Users,
+  FileSpreadsheet,
+  BarChart3,
   X,
 } from 'lucide-react';
 
@@ -35,6 +37,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen, onMobileClose }) =
     { label: 'Attendance', icon: <Clock size={18} />, to: '/admin/attendance' },
     { label: 'Time Off', icon: <CalendarDays size={18} />, to: '/admin/time-off' },
     { label: 'Payroll', icon: <CreditCard size={18} />, to: '/admin/payroll' },
+    { label: 'Reports', icon: <FileSpreadsheet size={18} />, to: '/admin/reports' },
+    { label: 'Analytics', icon: <BarChart3 size={18} />, to: '/admin/analytics' },
   ];
 
   const navLinks = role === 'ADMIN' ? adminLinks : employeeLinks;

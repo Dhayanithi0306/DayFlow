@@ -10,17 +10,17 @@ import {
   resetPassword,
 } from '../controllers/authController.js';
 import { authenticateToken } from '../middleware/authMiddleware.js';
-import { authRateLimiter } from '../middleware/rateLimiter.js';
+import { authLimiter } from '../middleware/rateLimiter.js';
 
 const router = Router();
 
 // Rate limited public auth routes
-router.post('/signup', authRateLimiter, signup);
-router.post('/login', authRateLimiter, login);
-router.post('/verify-email', authRateLimiter, verifyEmail);
-router.post('/resend-verification', authRateLimiter, resendVerification);
-router.post('/forgot-password', authRateLimiter, forgotPassword);
-router.post('/reset-password', authRateLimiter, resetPassword);
+router.post('/signup', authLimiter, signup);
+router.post('/login', authLimiter, login);
+router.post('/verify-email', authLimiter, verifyEmail);
+router.post('/resend-verification', authLimiter, resendVerification);
+router.post('/forgot-password', authLimiter, forgotPassword);
+router.post('/reset-password', authLimiter, resetPassword);
 
 // Protected auth routes
 router.get('/me', authenticateToken, getCurrentUser);

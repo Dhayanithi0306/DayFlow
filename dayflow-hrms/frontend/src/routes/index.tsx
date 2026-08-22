@@ -27,6 +27,8 @@ import { EmployeeDetails } from '../pages/admin/EmployeeDetails';
 import { AdminAttendance } from '../pages/admin/AdminAttendance';
 import { AdminTimeOff } from '../pages/admin/AdminTimeOff';
 import { AdminPayroll } from '../pages/admin/AdminPayroll';
+import { AdminReports } from '../pages/admin/AdminReports';
+import { AdminAnalytics } from '../pages/admin/AdminAnalytics';
 
 export const router = createBrowserRouter([
   // Public & Auth Routes (rendered with minimal header via MainLayout)
@@ -161,6 +163,14 @@ export const router = createBrowserRouter([
       {
         path: 'payroll',
         element: <AdminPayroll />,
+      },
+      {
+        path: 'reports',
+        element: <AdminReports />,
+      },
+      {
+        path: 'analytics',
+        element: <AdminAnalytics />,
       },
     ],
   },

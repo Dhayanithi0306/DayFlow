@@ -80,6 +80,10 @@ export interface Employee {
   employmentStatus: EmploymentStatus;
   designation: string;
   departmentId: string;
+  department?: {
+    id: string;
+    name: string;
+  } | null;
   managerId?: string;
   location?: string;
   address?: string;
