@@ -2,15 +2,16 @@ import React from 'react';
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   isLoading?: boolean;
+  loadingText?: string;
 }
 
-export const Button = ({ children, isLoading, disabled, ...props }: ButtonProps) => {
+export const Button = ({ children, isLoading, loadingText, disabled, ...props }: ButtonProps) => {
   return (
     <button className="btn-primary" disabled={isLoading || disabled} {...props}>
       {isLoading ? (
         <>
           <span className="spinner" aria-hidden="true"></span>
-          Signing in...
+          {loadingText || 'Loading...'}
         </>
       ) : (
         children
