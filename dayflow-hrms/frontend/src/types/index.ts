@@ -1,12 +1,71 @@
 export type UserRole = 'EMPLOYEE' | 'ADMIN';
+export type EmploymentStatus = 'ACTIVE' | 'INACTIVE' | 'ON_LEAVE' | 'TERMINATED';
+export type DocumentType = 'RESUME' | 'IDENTITY' | 'EDUCATION' | 'CERTIFICATE' | 'OTHER';
+export type AttendanceStatus = 'PRESENT' | 'ABSENT' | 'HALF_DAY' | 'LEAVE';
+export type LeaveType = 'PAID' | 'SICK' | 'UNPAID';
+export type LeaveStatus = 'PENDING' | 'APPROVED' | 'REJECTED';
+
+export interface Company {
+  id: string;
+  name: string;
+  code: string;
+  logoUrl?: string;
+  email?: string;
+  phone?: string;
+  address?: string;
+  city?: string;
+  state?: string;
+  country?: string;
+  createdAt: string;
+  updatedAt: string;
+}
 
 export interface User {
   id: string;
+  companyId: string;
   email: string;
-  fullName: string;
   role: UserRole;
-  department?: string;
-  avatarUrl?: string;
+  isActive: boolean;
+  isEmailVerified: boolean;
+  mustChangePassword: boolean;
+  lastLoginAt?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Department {
+  id: string;
+  companyId: string;
+  name: string;
+  description?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Employee {
+  id: string;
+  userId: string;
+  companyId: string;
+  employeeId: string;
+  firstName: string;
+  lastName: string;
+  phone?: string;
+  profilePictureUrl?: string;
+  dateOfBirth?: string;
+  gender?: string;
+  joiningDate: string;
+  employmentStatus: EmploymentStatus;
+  designation: string;
+  departmentId: string;
+  managerId?: string;
+  location?: string;
+  address?: string;
+  city?: string;
+  state?: string;
+  postalCode?: string;
+  country?: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface AuthState {
