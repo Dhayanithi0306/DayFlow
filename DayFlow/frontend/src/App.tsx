@@ -1,149 +1,134 @@
 import { useState } from 'react';
+import { AuthCard } from './components/AuthCard';
+import { InputField } from './components/ui/InputField';
+import { PasswordField } from './components/ui/PasswordField';
+import { Checkbox } from './components/ui/Checkbox';
+import { Button } from './components/ui/Button';
+import { Alert } from './components/ui/Alert';
 
 function App() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  
+  // Validation state
+  const [emailError, setEmailError] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+  
+  // Submission state
+  const [globalError, setGlobalError] = useState('');
+  const [success, setSuccess] = useState(false);
 
   const validateForm = () => {
-    if (!email.trim()) return 'Email or username is required.';
-    if (!password) return 'Password is required.';
-    return null;
+    let isValid = true;
+    setEmailError('');
+    setPasswordError('');
+
+    if (!email.trim()) {
+      setEmailError('Email or username is required');
+      isValid = false;
+    }
+    
+    if (!password) {
+      setPasswordError('Password is required');
+      isValid = false;
+    }
+    
+    return isValid;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
-    setSuccess('');
+    setGlobalError('');
+    setSuccess(false);
 
-    const validationError = validateForm();
-    if (validationError) {
-      setError(validationError);
+    if (!validateForm()) {
       return;
     }
 
     setIsLoading(true);
 
-    // Mock API call to the backend since it doesn't exist yet
+    // Mock API call to the backend
     try {
       await new Promise(resolve => setTimeout(resolve, 1500));
       
       // Simple mock authentication logic
       if (email.includes('@') && password.length >= 6) {
-        setSuccess('Login successful! Redirecting...');
-        // Here you would set auth state and redirect, e.g.,
-        // localStorage.setItem('token', 'mock-jwt-token');
-        // window.location.href = '/dashboard';
+        setSuccess(true);
+        // Realistic application flow: redirect instead of lingering on success state
+        setTimeout(() => {
+          // window.location.href = '/workspace';
+        }, 800);
       } else {
-        setError('Invalid credentials. Please try again.');
+        setGlobalError('Incorrect email or password. Please try again.');
       }
     } catch (err) {
-      setError('A network error occurred. Please try again later.');
+      setGlobalError('Something went wrong. Please try again.');
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="login-container">
-      <div className="brand-section">
-        <h1 className="brand-logo">DayFlow</h1>
-        <p className="brand-subtitle">Welcome back! Please enter your details.</p>
-      </div>
-
-      {error && (
-        <div className="alert alert-error" role="alert">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="12" cy="12" r="10"></circle>
-            <line x1="12" y1="8" x2="12" y2="12"></line>
-            <line x1="12" y1="16" x2="12.01" y2="16"></line>
-          </svg>
-          {error}
-        </div>
+    <AuthCard 
+      title="Welcome back" 
+      subtitle="Sign in to continue to your workspace."
+    >
+      {globalError && (
+        <Alert type="error">{globalError}</Alert>
       )}
 
       {success && (
-        <div className="alert alert-success" role="alert">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-            <polyline points="22 4 12 14.01 9 11.01"></polyline>
-          </svg>
-          {success}
-        </div>
+        <Alert type="success">Signed in successfully</Alert>
       )}
 
       <form onSubmit={handleSubmit} noValidate>
-        <div className="form-group">
-          <label htmlFor="email" className="form-label">Email or Username</label>
-          <input
-            id="email"
-            type="text"
-            className="form-input"
-            placeholder="Enter your email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            disabled={isLoading}
-            autoComplete="username"
-          />
-        </div>
+        <InputField
+          id="email"
+          label="Email or username"
+          type="text"
+          placeholder="name@company.com"
+          value={email}
+          onChange={(e) => {
+            setEmail(e.target.value);
+            if (emailError) setEmailError('');
+          }}
+          disabled={isLoading || success}
+          error={emailError}
+          autoComplete="username"
+          autoFocus
+        />
 
-        <div className="form-group">
-          <label htmlFor="password" className="form-label">Password</label>
-          <input
-            id="password"
-            type={showPassword ? "text" : "password"}
-            className="form-input"
-            placeholder="••••••••"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            disabled={isLoading}
-            autoComplete="current-password"
-          />
-          <button 
-            type="button"
-            className="password-toggle"
-            onClick={() => setShowPassword(!showPassword)}
-            aria-label={showPassword ? "Hide password" : "Show password"}
-          >
-            {showPassword ? (
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
-                <line x1="1" y1="1" x2="23" y2="23"></line>
-              </svg>
-            ) : (
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                <circle cx="12" cy="12" r="3"></circle>
-              </svg>
-            )}
-          </button>
-        </div>
+        <PasswordField
+          id="password"
+          label="Password"
+          placeholder="••••••••"
+          value={password}
+          onChange={(e) => {
+            setPassword(e.target.value);
+            if (passwordError) setPasswordError('');
+          }}
+          disabled={isLoading || success}
+          error={passwordError}
+          autoComplete="current-password"
+        />
 
         <div className="options-row">
-          <label className="remember-me">
-            <input type="checkbox" className="remember-checkbox" disabled={isLoading} />
-            Remember for 30 days
-          </label>
-          <a href="#" className="forgot-password" onClick={(e) => e.preventDefault()}>
+          <Checkbox 
+            id="remember" 
+            label="Remember me for 30 days" 
+            disabled={isLoading || success}
+          />
+          <a href="#" className="auth-link" onClick={(e) => e.preventDefault()}>
             Forgot password?
           </a>
         </div>
 
-        <button type="submit" className="btn-primary" disabled={isLoading}>
-          {isLoading ? (
-            <>
-              <span className="spinner"></span>
-              Signing in...
-            </>
-          ) : (
-            'Sign In'
-          )}
-        </button>
+        <Button type="submit" isLoading={isLoading} disabled={success}>
+          Sign In
+        </Button>
       </form>
-    </div>
+    </AuthCard>
   );
 }
 
