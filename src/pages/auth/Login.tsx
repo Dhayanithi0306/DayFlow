@@ -52,13 +52,14 @@ export const Login: React.FC = () => {
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-5">
+      <form onSubmit={handleSubmit} className="space-y-5" autoComplete="off">
         <Input
           label="Email address"
           type="email"
           placeholder="name@dayflow.com"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
+          autoComplete="new-password" // A known hack to stop aggressive browser autofill
         />
         
         <div className="space-y-1.5">
@@ -67,6 +68,7 @@ export const Login: React.FC = () => {
             placeholder="Enter your password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            autoComplete="new-password"
           />
           <div className="flex justify-between items-center px-1">
             <label className="flex items-center text-sm text-slate-600">
