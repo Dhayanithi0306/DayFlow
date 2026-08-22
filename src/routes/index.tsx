@@ -5,13 +5,14 @@ import { Signup } from '../pages/auth/Signup';
 import { VerifyEmail } from '../pages/auth/VerifyEmail';
 import { ForgotPassword } from '../pages/auth/ForgotPassword';
 import { ResetPassword } from '../pages/auth/ResetPassword';
-import { AdminDashboard } from '../pages/dashboard/Placeholders';
+import { AdminDashboard } from '../pages/admin/Dashboard';
 import { EmployeeDashboard } from '../pages/employee/Dashboard';
 import { EmployeeProfilePage } from '../pages/employee/Profile';
 import { EmployeeAttendancePage } from '../pages/employee/Attendance';
 import { EmployeeLeavePage } from '../pages/employee/Leave';
 import { EmployeePayrollPage } from '../pages/employee/Payroll';
 import { SalarySlipPage } from '../pages/employee/SalarySlip';
+import { FeaturePlaceholder } from '../pages/employee/FeaturePlaceholder';
 import { DashboardLayout } from '../layouts/DashboardLayout';
 import { ProtectedRoute } from './ProtectedRoute';
 import { useAuth } from '../context/AuthContext';
@@ -59,12 +60,21 @@ export const router = createBrowserRouter([
     ],
   },
   {
-    path: '/admin/dashboard',
+    path: '/admin',
     element: (
       <ProtectedRoute allowedRoles={['admin', 'hr']}>
-        <AdminDashboard />
+        <DashboardLayout />
       </ProtectedRoute>
     ),
+    children: [
+      { path: 'dashboard', element: <AdminDashboard /> },
+      { path: 'employees', element: <FeaturePlaceholder /> },
+      { path: 'attendance', element: <FeaturePlaceholder /> },
+      { path: 'leave-requests', element: <FeaturePlaceholder /> },
+      { path: 'payroll', element: <FeaturePlaceholder /> },
+      { path: 'reports', element: <FeaturePlaceholder /> },
+      { path: 'analytics', element: <FeaturePlaceholder /> },
+    ],
   },
   {
     path: '*',

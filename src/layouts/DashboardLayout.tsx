@@ -10,7 +10,10 @@ import {
   LogOut, 
   Bell, 
   Menu,
-  X
+  X,
+  Users,
+  FileText,
+  BarChart3
 } from 'lucide-react';
 
 export const DashboardLayout: React.FC = () => {
@@ -25,11 +28,28 @@ export const DashboardLayout: React.FC = () => {
       case '/employee/attendance': return 'Attendance';
       case '/employee/leave': return 'Leave Requests';
       case '/employee/payroll': return 'Payroll';
+      case '/admin/dashboard': return 'Dashboard';
+      case '/admin/employees': return 'Employees';
+      case '/admin/attendance': return 'Attendance';
+      case '/admin/leave-requests': return 'Leave Requests';
+      case '/admin/payroll': return 'Payroll';
+      case '/admin/reports': return 'Reports';
+      case '/admin/analytics': return 'Analytics';
       default: return 'Dashboard';
     }
   };
 
-  const navItems = [
+  const isAdminOrHR = currentUser?.role === 'admin' || currentUser?.role === 'hr';
+
+  const navItems = isAdminOrHR ? [
+    { name: 'Dashboard', path: '/admin/dashboard', icon: LayoutDashboard },
+    { name: 'Employees', path: '/admin/employees', icon: Users },
+    { name: 'Attendance', path: '/admin/attendance', icon: Clock },
+    { name: 'Leave Requests', path: '/admin/leave-requests', icon: Calendar },
+    { name: 'Payroll', path: '/admin/payroll', icon: Wallet },
+    { name: 'Reports', path: '/admin/reports', icon: FileText },
+    { name: 'Analytics', path: '/admin/analytics', icon: BarChart3 },
+  ] : [
     { name: 'Dashboard', path: '/employee/dashboard', icon: LayoutDashboard },
     { name: 'Profile', path: '/employee/profile', icon: User },
     { name: 'Attendance', path: '/employee/attendance', icon: Clock },
