@@ -13,6 +13,14 @@ import { NotFound } from '../pages/NotFound';
 import { PlaceholderPage } from '../pages/PlaceholderPage';
 import { ProtectedRoute } from '../components/ProtectedRoute';
 
+// Real Employee Pages
+import { EmployeeDashboard } from '../pages/employee/EmployeeDashboard';
+import { EmployeeProfile } from '../pages/employee/EmployeeProfile';
+
+// Real Admin Pages
+import { EmployeeDirectory } from '../pages/admin/EmployeeDirectory';
+import { EmployeeDetails } from '../pages/admin/EmployeeDetails';
+
 export const router = createBrowserRouter([
   // Public & Auth Routes (rendered with minimal header via MainLayout)
   {
@@ -69,27 +77,27 @@ export const router = createBrowserRouter([
     children: [
       {
         index: true,
-        element: <PlaceholderPage title="Employee Self-Service Portal" />,
+        element: <EmployeeDashboard />,
       },
       {
         path: 'dashboard',
-        element: <PlaceholderPage title="Employee Dashboard" />,
+        element: <EmployeeDashboard />,
       },
       {
         path: 'profile',
-        element: <PlaceholderPage title="Employee Profile Management" />,
+        element: <EmployeeProfile />,
       },
       {
         path: 'attendance',
-        element: <PlaceholderPage title="Employee Attendance & Check-in" />,
+        element: <PlaceholderPage title="Employee Attendance & Check-in (Coming in Stage 6)" />,
       },
       {
         path: 'time-off',
-        element: <PlaceholderPage title="Employee Time Off & Leave Requests" />,
+        element: <PlaceholderPage title="Employee Time Off & Leave Requests (Coming in Stage 7)" />,
       },
       {
         path: 'payroll',
-        element: <PlaceholderPage title="Employee Salary & Payroll Slips" />,
+        element: <PlaceholderPage title="Employee Salary & Payroll Slips (Coming in Stage 8)" />,
       },
     ],
   },
@@ -105,27 +113,31 @@ export const router = createBrowserRouter([
     children: [
       {
         index: true,
-        element: <PlaceholderPage title="Admin & HR Management Portal" />,
+        element: <EmployeeDirectory />,
       },
       {
         path: 'dashboard',
-        element: <PlaceholderPage title="Admin Overview & Analytics Dashboard" />,
+        element: <EmployeeDirectory />,
       },
       {
         path: 'employees',
-        element: <PlaceholderPage title="Admin Employee Directory Management" />,
+        element: <EmployeeDirectory />,
+      },
+      {
+        path: 'employees/:id',
+        element: <EmployeeDetails />,
       },
       {
         path: 'attendance',
-        element: <PlaceholderPage title="Admin Attendance Monitoring" />,
+        element: <PlaceholderPage title="Admin Attendance Monitoring (Coming in Stage 6)" />,
       },
       {
         path: 'time-off',
-        element: <PlaceholderPage title="Admin Time Off Request Approvals" />,
+        element: <PlaceholderPage title="Admin Time Off Request Approvals (Coming in Stage 7)" />,
       },
       {
         path: 'payroll',
-        element: <PlaceholderPage title="Admin Payroll & Salary Processing" />,
+        element: <PlaceholderPage title="Admin Payroll & Salary Processing (Coming in Stage 8)" />,
       },
     ],
   },
