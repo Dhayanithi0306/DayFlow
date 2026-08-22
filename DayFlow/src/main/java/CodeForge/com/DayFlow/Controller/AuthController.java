@@ -36,4 +36,14 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
         }
     }
+
+    @PostMapping("/verify")
+    public ResponseEntity<AuthResponse> verifyEmail(@RequestParam String email) {
+        AuthResponse response = authService.verifyEmail(email);
+        if (response.isSuccess()) {
+            return ResponseEntity.ok(response);
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        }
+    }
 }
