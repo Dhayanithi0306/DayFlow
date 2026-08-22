@@ -1,71 +1,93 @@
 import React from 'react';
 import type { Payroll } from '../../types/payroll';
-import { FileText } from 'lucide-react';
+import { Eye, CheckCircle2, AlertCircle } from 'lucide-react';
 import { formatCurrency } from '../../utils/formatCurrency';
 
 interface PayrollTableProps {
   payrollRecords: Payroll[];
-  onViewSlip: (payroll: Payroll) => void;
   isLoading: boolean;
+  onViewSlip: (payroll: Payroll) => void;
 }
 
-export const PayrollTable: React.FC<PayrollTableProps> = ({ payrollRecords, onViewSlip, isLoading }) => {
+export const PayrollTable: React.FC<PayrollTableProps> = ({ payrollRecords, isLoading, onViewSlip }) => {
   if (isLoading) {
     return (
-      <div className="w-full h-48 flex items-center justify-center bg-white rounded-lg shadow-sm border border-gray-100">
-        <p className="text-gray-500">Loading payroll records...</p>
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-violet-600"></div>
       </div>
     );
   }
 
   if (payrollRecords.length === 0) {
     return (
-      <div className="w-full h-48 flex items-center justify-center bg-white rounded-lg shadow-sm border border-gray-100">
-        <p className="text-gray-500">No payroll records found.</p>
+      <div className="flex flex-col justify-center items-center h-64 text-gray-500">
+        <p className="font-medium text-sm">No payroll records found for the selected criteria.</p>
       </div>
     );
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-x-auto">
-      <table className="w-full text-left text-sm">
-        <thead className="bg-gray-50 text-gray-600 font-medium border-b border-gray-100">
+    <div className="overflow-x-auto">
+      <table className="min-w-full divide-y divide-gray-100">
+        <thead className="bg-white">
           <tr>
-            <th className="py-3 px-4">Employee</th>
-            <th className="py-3 px-4">Month/Year</th>
-            <th className="py-3 px-4">Gross Salary</th>
-            <th className="py-3 px-4">Deductions</th>
-            <th className="py-3 px-4">Net Salary</th>
-            <th className="py-3 px-4">Status</th>
-            <th className="py-3 px-4 text-right">Actions</th>
+            <th scope="col" className="px-6 py-4 text-left text-[11px] font-bold text-gray-400 uppercase tracking-widest">
+              Employee
+            </th>
+            <th scope="col" className="px-6 py-4 text-left text-[11px] font-bold text-gray-400 uppercase tracking-widest">
+              System Login ID
+            </th>
+            <th scope="col" className="px-6 py-4 text-left text-[11px] font-bold text-gray-400 uppercase tracking-widest">
+              Net Pay
+            </th>
+            <th scope="col" className="px-6 py-4 text-left text-[11px] font-bold text-gray-400 uppercase tracking-widest">
+              Status
+            </th>
+            <th scope="col" className="px-6 py-4 text-right text-[11px] font-bold text-gray-400 uppercase tracking-widest">
+              Actions
+            </th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-gray-100">
+        <tbody className="bg-white divide-y divide-gray-50">
           {payrollRecords.map((record) => (
             <tr key={record.id} className="hover:bg-gray-50/50 transition-colors">
-              <td className="py-3 px-4">
-                <div className="font-medium text-gray-900">{record.employeeName}</div>
-                <div className="text-xs text-gray-500">{record.employeeId} - {record.department}</div>
+              <td className="px-6 py-4 whitespace-nowrap">
+                <div className="flex items-center">
+                  <div className="flex-shrink-0 h-10 w-10 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-700 font-bold overflow-hidden">
+                    {record.employeeName.charAt(0)}
+                  </div>
+                  <div className="ml-4">
+                    <div className="text-sm font-bold text-gray-900">{record.employeeName}</div>
+                    <div className="text-xs text-gray-400 font-medium">{record.employeeName.toLowerCase().replace(' ', '.')}@dayflow.com</div>
+                  </div>
+                </div>
               </td>
-              <td className="py-3 px-4 text-gray-600">{record.month} {record.year}</td>
-              <td className="py-3 px-4 text-gray-900">{formatCurrency(record.grossSalary)}</td>
-              <td className="py-3 px-4 text-red-600">-{formatCurrency(record.structure.deductions + record.structure.tax)}</td>
-              <td className="py-3 px-4 font-semibold text-gray-900">{formatCurrency(record.netSalary)}</td>
-              <td className="py-3 px-4">
-                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                  ${record.status === 'Paid' ? 'bg-green-100 text-green-800' : ''}
-                  ${record.status === 'Pending' ? 'bg-yellow-100 text-yellow-800' : ''}
-                  ${record.status === 'Processed' ? 'bg-blue-100 text-blue-800' : ''}
-                `}>
-                  {record.status}
-                </span>
+              <td className="px-6 py-4 whitespace-nowrap">
+                <div className="text-xs font-bold text-violet-600">{record.employeeId}</div>
               </td>
-              <td className="py-3 px-4 text-right">
-                <button 
+              <td className="px-6 py-4 whitespace-nowrap">
+                <div className="text-sm font-bold text-gray-900">{formatCurrency(record.netSalary)}</div>
+                <div className="text-xs text-gray-400 font-medium">For {record.month} {record.year}</div>
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap">
+                {record.status === 'Paid' ? (
+                  <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-600">
+                    <CheckCircle2 className="w-3 h-3 mr-1" />
+                    Paid
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-50 text-amber-600">
+                    <AlertCircle className="w-3 h-3 mr-1" />
+                    Pending
+                  </span>
+                )}
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                <button
                   onClick={() => onViewSlip(record)}
-                  className="inline-flex items-center text-indigo-600 hover:text-indigo-900 font-medium text-sm transition-colors"
+                  className="inline-flex items-center text-gray-500 hover:text-gray-900 transition-colors font-bold text-xs"
                 >
-                  <FileText className="w-4 h-4 mr-1" />
+                  <Eye className="h-4 w-4 mr-1" />
                   View Slip
                 </button>
               </td>

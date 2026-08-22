@@ -24,11 +24,9 @@ export const PayrollPage: React.FC = () => {
       setIsLoading(true);
       setError(null);
       try {
-        // If employee, only fetch their own records. If Admin/HR, fetch all based on filters.
         const employeeIdFilter = !isAdminOrHr ? user?.employeeId : undefined;
         const records = await getPayrollRecords(month || undefined, year || undefined, employeeIdFilter);
         
-        // Apply client-side search filter for admin/hr
         let filteredRecords = records;
         if (isAdminOrHr && searchQuery) {
           const lowerQuery = searchQuery.toLowerCase();
@@ -57,39 +55,57 @@ export const PayrollPage: React.FC = () => {
 
   return (
     <div>
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-900">
-          {isAdminOrHr ? 'Payroll Management' : 'My Payroll'}
-        </h1>
-        <p className="text-gray-500 mt-1">
-          {isAdminOrHr 
-            ? 'Manage and view payroll for all employees across the organization.' 
-            : 'View your salary history and download your salary slips.'}
-        </p>
+      <div className="flex justify-between items-start mb-6">
+        <div>
+          <div className="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-1.5 flex items-center space-x-2">
+            <span>DAYFLOW</span>
+            <span className="text-gray-300">/</span>
+            <span>{isAdminOrHr ? 'FINANCE & DATA' : 'MY PORTAL'}</span>
+            <span className="text-gray-300">/</span>
+            <span className="text-gray-600">{isAdminOrHr ? 'PAYROLL MANAGEMENT' : 'MY PAYROLL'}</span>
+          </div>
+          <h1 className="text-2xl font-black text-gray-900 tracking-tight">
+            {isAdminOrHr ? 'Payroll Management' : 'My Payroll'}
+          </h1>
+          <p className="text-sm font-medium text-gray-500 mt-1">
+            {isAdminOrHr 
+              ? 'Search, filter, view payroll records, and generate salary slips.' 
+              : 'View your salary history and download your salary slips.'}
+          </p>
+        </div>
+        {isAdminOrHr && (
+          <button className="bg-violet-600 hover:bg-violet-700 transition-colors text-white text-sm font-bold px-5 py-2.5 rounded-full shadow-sm shadow-violet-200 flex items-center">
+            <span className="mr-2 text-lg leading-none font-light">+</span> Run Payroll
+          </button>
+        )}
       </div>
 
-      {isAdminOrHr && (
-        <PayrollFilters
-          month={month}
-          year={year}
-          searchQuery={searchQuery}
-          onMonthChange={setMonth}
-          onYearChange={setYear}
-          onSearchChange={setSearchQuery}
-        />
-      )}
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        {isAdminOrHr && (
+          <PayrollFilters
+            month={month}
+            year={year}
+            searchQuery={searchQuery}
+            onMonthChange={setMonth}
+            onYearChange={setYear}
+            onSearchChange={setSearchQuery}
+          />
+        )}
 
-      {error ? (
-        <div className="p-4 bg-red-50 text-red-700 rounded-md border border-red-100">
-          {error}
-        </div>
-      ) : (
-        <PayrollTable 
-          payrollRecords={payrollData} 
-          isLoading={isLoading} 
-          onViewSlip={handleViewSlip} 
-        />
-      )}
+        {error ? (
+          <div className="p-6">
+            <div className="p-4 bg-red-50 text-red-700 rounded-md border border-red-100 font-medium text-sm">
+              {error}
+            </div>
+          </div>
+        ) : (
+          <PayrollTable 
+            payrollRecords={payrollData} 
+            isLoading={isLoading} 
+            onViewSlip={handleViewSlip} 
+          />
+        )}
+      </div>
     </div>
   );
 };
