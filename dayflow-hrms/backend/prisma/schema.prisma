@@ -147,6 +147,7 @@ model Employee {
   documents        EmployeeDocument[]
   attendances      Attendance[]
   leaveRequests    LeaveRequest[]
+  leaveBalances    LeaveBalance[]
   salaryStructures SalaryStructure[]
   payrollRecords   PayrollRecord[]
 
@@ -235,6 +236,21 @@ model LeaveRequest {
   reviewer User?    @relation("ReviewedLeaves", fields: [reviewedById], references: [id], onDelete: SetNull)
 
   @@index([employeeId, status, startDate, endDate])
+}
+
+model LeaveBalance {
+  id            String    @id @default(uuid())
+  employeeId    String
+  leaveType     LeaveType
+  allocatedDays Int       @default(12)
+  usedDays      Int       @default(0)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  employee Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  @@unique([employeeId, leaveType])
+  @@index([employeeId])
 }
 
 model SalaryStructure {

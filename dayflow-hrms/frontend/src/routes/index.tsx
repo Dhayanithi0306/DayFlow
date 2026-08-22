@@ -17,11 +17,13 @@ import { ProtectedRoute } from '../components/ProtectedRoute';
 import { EmployeeDashboard } from '../pages/employee/EmployeeDashboard';
 import { EmployeeProfile } from '../pages/employee/EmployeeProfile';
 import { EmployeeAttendance } from '../pages/employee/EmployeeAttendance';
+import { EmployeeTimeOff } from '../pages/employee/EmployeeTimeOff';
 
 // Real Admin Pages
 import { EmployeeDirectory } from '../pages/admin/EmployeeDirectory';
 import { EmployeeDetails } from '../pages/admin/EmployeeDetails';
 import { AdminAttendance } from '../pages/admin/AdminAttendance';
+import { AdminTimeOff } from '../pages/admin/AdminTimeOff';
 
 export const router = createBrowserRouter([
   // Public & Auth Routes (rendered with minimal header via MainLayout)
@@ -95,7 +97,7 @@ export const router = createBrowserRouter([
       },
       {
         path: 'time-off',
-        element: <PlaceholderPage title="Employee Time Off & Leave Requests (Coming in Stage 7)" />,
+        element: <EmployeeTimeOff />,
       },
       {
         path: 'payroll',
@@ -135,7 +137,7 @@ export const router = createBrowserRouter([
       },
       {
         path: 'time-off',
-        element: <PlaceholderPage title="Admin Time Off Request Approvals (Coming in Stage 7)" />,
+        element: <AdminTimeOff />,
       },
       {
         path: 'payroll',

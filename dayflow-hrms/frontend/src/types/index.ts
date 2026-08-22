@@ -108,6 +108,41 @@ export interface Attendance {
   } | null;
 }
 
+export interface LeaveBalance {
+  leaveType: LeaveType;
+  allocatedDays: number;
+  usedDays: number;
+  remainingDays: number;
+}
+
+export interface LeaveRequest {
+  id: string;
+  employeeId: string;
+  leaveType: LeaveType;
+  startDate: string;
+  endDate: string;
+  duration: number;
+  remarks?: string | null;
+  attachmentUrl?: string | null;
+  status: LeaveStatus;
+  reviewedById?: string | null;
+  reviewedAt?: string | null;
+  reviewerComment?: string | null;
+  createdAt: string;
+  updatedAt: string;
+  employee?: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    employeeId: string;
+    profilePictureUrl?: string | null;
+    department?: {
+      id: string;
+      name: string;
+    } | null;
+  } | null;
+}
+
 export interface AuthState {
   user: User | null;
   token: string | null;
