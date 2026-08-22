@@ -3,6 +3,7 @@ import { RouterProvider } from 'react-router-dom';
 import { router } from './routes';
 import { AuthProvider } from './context/AuthContext';
 import { ToastProvider } from './context/ToastContext';
+import { NotificationProvider } from './context/NotificationContext';
 import { ErrorBoundary } from './components/ErrorBoundary';
 
 export const App: React.FC = () => {
@@ -10,7 +11,9 @@ export const App: React.FC = () => {
     <ErrorBoundary>
       <ToastProvider>
         <AuthProvider>
-          <RouterProvider router={router} />
+          <NotificationProvider>
+            <RouterProvider router={router} />
+          </NotificationProvider>
         </AuthProvider>
       </ToastProvider>
     </ErrorBoundary>

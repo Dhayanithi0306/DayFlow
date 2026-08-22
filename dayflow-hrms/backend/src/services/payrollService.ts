@@ -308,6 +308,17 @@ export class PayrollService {
         },
       });
 
+      // 3. Notification Trigger
+      await tx.notification.create({
+        data: {
+          userId: employee.userId,
+          type: 'SALARY_UPDATED',
+          title: 'Salary Structure Updated',
+          message: 'Your salary structure has been updated by HR. View details in your payroll portal.',
+          linkUrl: '/employee/payroll',
+        },
+      });
+
       return created;
     });
 
@@ -405,6 +416,17 @@ export class PayrollService {
             presentDays,
             leaveDays,
             absentDays,
+          },
+        });
+
+        // Notification Trigger
+        await tx.notification.create({
+          data: {
+            userId: emp.userId,
+            type: 'PAYROLL_GENERATED',
+            title: 'Payroll Generated',
+            message: `Your payroll statement for period ${input.payPeriodStart} to ${input.payPeriodEnd} has been generated.`,
+            linkUrl: '/employee/payroll',
           },
         });
 

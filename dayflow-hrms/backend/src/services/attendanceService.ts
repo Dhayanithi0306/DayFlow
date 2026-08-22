@@ -418,6 +418,16 @@ export class AttendanceService {
         },
       });
 
+      await tx.notification.create({
+        data: {
+          userId: existing.employee.userId,
+          type: 'ATTENDANCE_UPDATED',
+          title: 'Attendance Record Updated',
+          message: `Your attendance record for ${existing.date.toISOString().split('T')[0]} has been updated by HR.`,
+          linkUrl: '/employee/attendance',
+        },
+      });
+
       return updated;
     });
 

@@ -125,6 +125,24 @@ export class LeaveService {
       },
     });
 
+    // Notification Trigger: Notify Admins of new leave submission
+    const admins = await prisma.user.findMany({
+      where: { companyId: employee.companyId, role: 'ADMIN' },
+      select: { id: true },
+    });
+    if (admins.length > 0) {
+      await prisma.notification.createMany({
+        data: admins.map((admin) => ({
+          userId: admin.id,
+          type: 'LEAVE_SUBMITTED',
+          title: 'New Leave Request',
+          message: `New ${input.leaveType} leave application submitted by ${employee.firstName} ${employee.lastName} (${duration} days).`,
+          linkUrl: '/admin/time-off',
+          isRead: false,
+        })),
+      });
+    }
+
     return leaveRequest;
   }
 
@@ -346,6 +364,17 @@ export class LeaveService {
         },
       });
 
+      // 4. Create Notification for Employee
+      await tx.notification.create({
+        data: {
+          userId: leave.employee.userId,
+          type: 'LEAVE_APPROVED',
+          title: 'Leave Request Approved',
+          message: `Your ${leave.leaveType} leave request for ${leave.duration} day(s) has been approved.`,
+          linkUrl: '/employee/time-off',
+        },
+      });
+
       return updatedLeave;
     });
 
@@ -401,6 +430,16 @@ export class LeaveService {
           entityType: 'LEAVE',
           entityId: leaveId,
           description: `Admin rejected ${leave.leaveType} leave for ${leave.employee.employeeId}.`,
+        },
+      });
+
+      await tx.notification.create({
+        data: {
+          userId: leave.employee.userId,
+          type: 'LEAVE_REJECTED',
+          title: 'Leave Request Rejected',
+          message: `Your ${leave.leaveType} leave request has been rejected by HR.`,
+          linkUrl: '/employee/time-off',
         },
       });
 

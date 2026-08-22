@@ -4,6 +4,14 @@ export type DocumentType = 'RESUME' | 'IDENTITY' | 'EDUCATION' | 'CERTIFICATE' |
 export type AttendanceStatus = 'PRESENT' | 'ABSENT' | 'HALF_DAY' | 'LEAVE';
 export type LeaveType = 'PAID' | 'SICK' | 'UNPAID';
 export type LeaveStatus = 'PENDING' | 'APPROVED' | 'REJECTED';
+export type NotificationType =
+  | 'LEAVE_SUBMITTED'
+  | 'LEAVE_APPROVED'
+  | 'LEAVE_REJECTED'
+  | 'SALARY_UPDATED'
+  | 'PAYROLL_GENERATED'
+  | 'ATTENDANCE_UPDATED'
+  | 'SYSTEM';
 
 export interface ApiResponse<T = unknown> {
   success: boolean;
@@ -209,6 +217,82 @@ export interface PayrollRecord {
     } | null;
   } | null;
   payslip?: Payslip | null;
+}
+
+export interface Notification {
+  id: string;
+  userId: string;
+  type: NotificationType;
+  title: string;
+  message: string;
+  isRead: boolean;
+  linkUrl?: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AuditLog {
+  id: string;
+  companyId: string;
+  userId?: string | null;
+  action: string;
+  entityType: string;
+  entityId?: string | null;
+  description?: string | null;
+  createdAt: string;
+  user?: {
+    email: string;
+    employee?: {
+      firstName: string;
+      lastName: string;
+    } | null;
+  } | null;
+}
+
+export interface EmployeeDashboardData {
+  employee: {
+    id: string;
+    employeeId: string;
+    firstName: string;
+    lastName: string;
+    designation: string;
+    departmentName: string;
+    profilePictureUrl?: string | null;
+    email: string;
+  };
+  todayAttendance: Attendance | null;
+  attendanceSummary: {
+    presentCount: number;
+    absentCount: number;
+    halfDayCount: number;
+    leaveCount: number;
+    totalWorkingMinutes: number;
+    totalExtraMinutes: number;
+  };
+  leaveBalances: LeaveBalance[];
+  upcomingLeave: LeaveRequest[];
+  salaryInfo: ComputedSalaryTotals | null;
+  recentPayroll: PayrollRecord | null;
+  unreadCount: number;
+}
+
+export interface AdminDashboardData {
+  totalActiveEmployees: number;
+  todayAttendance: {
+    presentCount: number;
+    absentCount: number;
+    halfDayCount: number;
+    leaveCount: number;
+  };
+  pendingLeavesCount: number;
+  payrollSummary: {
+    totalEmployees: number;
+    employeesWithSalary: number;
+    totalGrossPayroll: string;
+    totalDeductions: string;
+    totalNetPayroll: string;
+  };
+  recentAuditLogs: AuditLog[];
 }
 
 export interface AuthState {

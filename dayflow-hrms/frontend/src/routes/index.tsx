@@ -10,6 +10,7 @@ import { ResetPassword } from '../pages/ResetPassword';
 import { ChangePassword } from '../pages/ChangePassword';
 import { Unauthorized } from '../pages/Unauthorized';
 import { NotFound } from '../pages/NotFound';
+import { NotificationsPage } from '../pages/NotificationsPage';
 import { ProtectedRoute } from '../components/ProtectedRoute';
 
 // Real Employee Pages
@@ -20,6 +21,7 @@ import { EmployeeTimeOff } from '../pages/employee/EmployeeTimeOff';
 import { EmployeePayroll } from '../pages/employee/EmployeePayroll';
 
 // Real Admin Pages
+import { AdminDashboard } from '../pages/admin/AdminDashboard';
 import { EmployeeDirectory } from '../pages/admin/EmployeeDirectory';
 import { EmployeeDetails } from '../pages/admin/EmployeeDetails';
 import { AdminAttendance } from '../pages/admin/AdminAttendance';
@@ -71,6 +73,22 @@ export const router = createBrowserRouter([
     ],
   },
 
+  // Authenticated Notifications Route (rendered inside AppLayout shell)
+  {
+    path: '/notifications',
+    element: (
+      <ProtectedRoute>
+        <AppLayout />
+      </ProtectedRoute>
+    ),
+    children: [
+      {
+        index: true,
+        element: <NotificationsPage />,
+      },
+    ],
+  },
+
   // Authenticated Employee Portal Routes (rendered within full AppLayout shell)
   {
     path: '/employee',
@@ -118,11 +136,11 @@ export const router = createBrowserRouter([
     children: [
       {
         index: true,
-        element: <EmployeeDirectory />,
+        element: <AdminDashboard />,
       },
       {
         path: 'dashboard',
-        element: <EmployeeDirectory />,
+        element: <AdminDashboard />,
       },
       {
         path: 'employees',

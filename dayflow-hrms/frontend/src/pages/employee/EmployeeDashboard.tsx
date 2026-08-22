@@ -1,203 +1,265 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
-import { employeeService } from '../../services/employeeService';
-import { Employee } from '../../types';
+import { useNavigate } from 'react-router-dom';
+import { EmployeeDashboardData } from '../../types';
+import { dashboardService } from '../../services/dashboardService';
+import { attendanceService } from '../../services/attendanceService';
 import { PageHeader } from '../../components/common/PageHeader';
+import { CheckInCard } from '../../components/attendance/CheckInCard';
+import { LeaveBalanceCards } from '../../components/leave/LeaveBalanceCards';
+import { SalarySummaryCard } from '../../components/payroll/SalarySummaryCard';
 import { Card } from '../../components/common/Card';
-import { StatCard } from '../../components/common/StatCard';
-import { Badge } from '../../components/common/Badge';
 import { Avatar } from '../../components/common/Avatar';
-import { Button } from '../../components/common/Button';
 import { LoadingState } from '../../components/common/LoadingState';
+import { formatDate, formatCurrency } from '../../utils/formatters';
 import {
   User,
   Clock,
   CalendarDays,
-  CreditCard,
-  Building2,
-  MapPin,
-  ArrowRight,
-  ShieldCheck,
-  Sparkles,
+  Wallet,
+  CalendarCheck,
+  CheckCircle2,
+  XCircle,
+  AlertCircle,
+  FileText,
 } from 'lucide-react';
 
 export const EmployeeDashboard: React.FC = () => {
-  const { user } = useAuth();
   const navigate = useNavigate();
-
-  const [employee, setEmployee] = useState<Employee | null>(null);
+  const [data, setData] = useState<EmployeeDashboardData | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
+  const [actionLoading, setActionLoading] = useState<boolean>(false);
+
+  const fetchDashboard = async () => {
+    try {
+      const res = await dashboardService.getEmployeeDashboard();
+      if (res.success && res.data?.dashboard) {
+        setData(res.data.dashboard);
+      }
+    } catch (err) {
+      console.error('Error fetching employee dashboard:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const res = await employeeService.getSelfProfile();
-        if (res.success && res.data?.employee) {
-          setEmployee(res.data.employee);
-        }
-      } catch (err) {
-        console.error('Error fetching employee dashboard profile:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchProfile();
+    fetchDashboard();
   }, []);
 
+  const handleCheckIn = async () => {
+    setActionLoading(true);
+    try {
+      await attendanceService.checkIn();
+      await fetchDashboard();
+    } catch (err) {
+      console.error('Check in error:', err);
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleCheckOut = async () => {
+    setActionLoading(true);
+    try {
+      await attendanceService.checkOut();
+      await fetchDashboard();
+    } catch (err) {
+      console.error('Check out error:', err);
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return 'Good Morning';
+    if (hour < 18) return 'Good Afternoon';
+    return 'Good Evening';
+  };
+
   if (loading) {
-    return <LoadingState message="Loading your employee portal dashboard..." />;
+    return <LoadingState message="Loading your HRMS dashboard..." />;
   }
 
-  const displayName = employee
-    ? `${employee.firstName} ${employee.lastName}`
-    : user?.email || 'Employee';
+  if (!data) return null;
+
+  const { employee, todayAttendance, attendanceSummary, leaveBalances, upcomingLeave, salaryInfo, recentPayroll } = data;
 
   return (
     <div className="space-y-6">
+      {/* Dynamic Welcome Header */}
       <PageHeader
-        title={`Welcome back, ${displayName}!`}
-        subtitle="Your personalized employee self-service hub."
-        action={
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => navigate('/employee/profile')}
-            icon={<User size={16} />}
-          >
-            View Full Profile
-          </Button>
-        }
+        title={`${getGreeting()}, ${employee.firstName}!`}
+        subtitle="Here is your personal HR portal overview and workday summary."
       />
 
-      {/* Profile Overview Header Card */}
-      <Card className="bg-gradient-to-r from-indigo-900 to-slate-900 text-white border-0 shadow-lg">
-        <div className="flex flex-col md:flex-row items-center md:items-start justify-between gap-6">
-          <div className="flex flex-col sm:flex-row items-center gap-5 text-center sm:text-left">
-            <Avatar name={displayName} src={employee?.profilePictureUrl} size="xl" className="ring-4 ring-white/20" />
-            <div className="space-y-1">
-              <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
-                <h2 className="text-xl font-extrabold text-white">{displayName}</h2>
-                <Badge variant="success" size="sm">
-                  {employee?.employmentStatus || 'ACTIVE'}
-                </Badge>
-              </div>
-              <p className="text-xs text-indigo-200 font-medium">{employee?.designation || 'Team Member'}</p>
-              <div className="flex flex-wrap items-center justify-center sm:justify-start gap-4 text-xs text-slate-300 pt-2 font-mono">
-                <span className="flex items-center gap-1.5">
-                  <Badge variant="primary" size="sm">ID</Badge>
-                  {employee?.employeeId || 'N/A'}
-                </span>
-                <span className="flex items-center gap-1">
-                  <Building2 size={14} className="text-indigo-400" />
-                  {(employee as any)?.department?.name || 'Department'}
-                </span>
-                <span className="flex items-center gap-1">
-                  <MapPin size={14} className="text-sky-400" />
-                  {employee?.location || 'Main Office'}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white/10 backdrop-blur-md p-4 rounded-2xl border border-white/15 text-center sm:text-right shrink-0 min-w-[200px]">
-            <p className="text-[10px] uppercase font-semibold text-indigo-200 tracking-wider">Account Status</p>
-            <p className="text-sm font-bold text-emerald-400 flex items-center justify-center sm:justify-end gap-1.5 mt-0.5">
-              <ShieldCheck size={16} /> Verified & Active
-            </p>
-            <p className="text-[11px] text-slate-300 mt-2 font-mono">
-              Role: <span className="text-indigo-300 font-semibold">{user?.role}</span>
-            </p>
+      {/* Employee Identity Banner */}
+      <div className="bg-gradient-to-r from-indigo-900 via-indigo-800 to-indigo-900 rounded-3xl p-6 text-white shadow-lg flex flex-col md:flex-row items-center justify-between gap-6">
+        <div className="flex items-center gap-4">
+          <Avatar
+            name={`${employee.firstName} ${employee.lastName}`}
+            src={employee.profilePictureUrl}
+            size="xl"
+            className="ring-4 ring-white/20"
+          />
+          <div>
+            <h2 className="text-xl font-extrabold tracking-tight">
+              {employee.firstName} {employee.lastName}
+            </h2>
+            <p className="text-xs text-indigo-200 font-medium">{employee.designation} • {employee.departmentName}</p>
+            <p className="text-[11px] font-mono text-indigo-300 mt-1">ID: {employee.employeeId}</p>
           </div>
         </div>
-      </Card>
 
-      {/* Quick Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
-        <StatCard
-          icon={<User size={22} />}
-          label="Profile Status"
-          value="Complete"
-          description="Self-service profile active"
-          iconColor="indigo"
-        />
-
-        <StatCard
-          icon={<Clock size={22} />}
-          label="Attendance"
-          value="Stage 6"
-          description="Check-in module next"
-          iconColor="sky"
-        />
-
-        <StatCard
-          icon={<CalendarDays size={22} />}
-          label="Time Off Requests"
-          value="Stage 7"
-          description="Leave request engine next"
-          iconColor="amber"
-        />
-
-        <StatCard
-          icon={<CreditCard size={22} />}
-          label="Payroll Slips"
-          value="Stage 8"
-          description="Salary processing next"
-          iconColor="emerald"
-        />
+        {/* Quick Action Buttons Grid */}
+        <div className="flex flex-wrap items-center gap-2.5 w-full md:w-auto">
+          <button
+            onClick={() => navigate('/employee/profile')}
+            className="px-3.5 py-2 bg-white/10 hover:bg-white/20 text-white rounded-xl text-xs font-semibold backdrop-blur-xs transition-all flex items-center gap-2 cursor-pointer"
+          >
+            <User size={15} /> Profile
+          </button>
+          <button
+            onClick={() => navigate('/employee/attendance')}
+            className="px-3.5 py-2 bg-white/10 hover:bg-white/20 text-white rounded-xl text-xs font-semibold backdrop-blur-xs transition-all flex items-center gap-2 cursor-pointer"
+          >
+            <Clock size={15} /> Attendance
+          </button>
+          <button
+            onClick={() => navigate('/employee/time-off')}
+            className="px-3.5 py-2 bg-white/10 hover:bg-white/20 text-white rounded-xl text-xs font-semibold backdrop-blur-xs transition-all flex items-center gap-2 cursor-pointer"
+          >
+            <CalendarDays size={15} /> Apply Leave
+          </button>
+          <button
+            onClick={() => navigate('/employee/payroll')}
+            className="px-3.5 py-2 bg-white/10 hover:bg-white/20 text-white rounded-xl text-xs font-semibold backdrop-blur-xs transition-all flex items-center gap-2 cursor-pointer"
+          >
+            <Wallet size={15} /> Payslips
+          </button>
+        </div>
       </div>
 
-      {/* Module Navigation Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Profile Card */}
-        <Card title="Employee Profile Management">
-          <div className="space-y-4">
-            <p className="text-xs text-slate-600 leading-relaxed">
-              View and manage your general profile, private contact information, job details, uploaded documents, and salary structure.
-            </p>
-            <Link
-              to="/employee/profile"
-              className="w-full inline-flex items-center justify-between p-3 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-semibold text-xs rounded-xl transition-colors"
-            >
-              <span>Manage Profile Details</span>
-              <ArrowRight size={16} />
-            </Link>
-          </div>
-        </Card>
+      {/* Grid Row 1: Today's Attendance & Monthly Attendance Summary */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-1">
+          <CheckInCard
+            todayAttendance={todayAttendance}
+            onCheckIn={handleCheckIn}
+            onCheckOut={handleCheckOut}
+            loading={actionLoading}
+          />
+        </div>
 
-        {/* Attendance Module Placeholder */}
-        <Card title="Attendance & Check-in">
-          <div className="space-y-4">
-            <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 text-center space-y-2">
-              <Sparkles size={24} className="text-sky-500 mx-auto" />
-              <p className="text-xs font-semibold text-slate-800">Attendance Module Integration</p>
-              <p className="text-[11px] text-slate-500">
-                Daily check-in, check-out, working hours logging, and attendance history will be activated in Stage 6.
-              </p>
-            </div>
-            <div className="text-center text-xs text-slate-400 font-semibold py-1">
-              Coming in Stage 6
-            </div>
-          </div>
-        </Card>
+        <div className="lg:col-span-2">
+          <Card title="Monthly Attendance Summary">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
+              <div className="p-4 bg-emerald-50 border border-emerald-100 rounded-2xl">
+                <CheckCircle2 size={24} className="text-emerald-600 mx-auto mb-1" />
+                <span className="text-xs text-slate-500 font-medium block">Present</span>
+                <span className="text-2xl font-extrabold text-emerald-700 font-mono">
+                  {attendanceSummary?.presentCount ?? 0} Days
+                </span>
+              </div>
 
-        {/* Leave / Time Off Module Placeholder */}
-        <Card title="Time Off & Leave Requests">
-          <div className="space-y-4">
-            <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 text-center space-y-2">
-              <Sparkles size={24} className="text-amber-500 mx-auto" />
-              <p className="text-xs font-semibold text-slate-800">Leave Processing Engine</p>
-              <p className="text-[11px] text-slate-500">
-                Paid, sick, and unpaid leave applications and balance tracking will be activated in Stage 7.
-              </p>
+              <div className="p-4 bg-rose-50 border border-rose-100 rounded-2xl">
+                <XCircle size={24} className="text-rose-600 mx-auto mb-1" />
+                <span className="text-xs text-slate-500 font-medium block">Absent</span>
+                <span className="text-2xl font-extrabold text-rose-700 font-mono">
+                  {attendanceSummary?.absentCount ?? 0} Days
+                </span>
+              </div>
+
+              <div className="p-4 bg-amber-50 border border-amber-100 rounded-2xl">
+                <AlertCircle size={24} className="text-amber-600 mx-auto mb-1" />
+                <span className="text-xs text-slate-500 font-medium block">Half Day</span>
+                <span className="text-2xl font-extrabold text-amber-700 font-mono">
+                  {attendanceSummary?.halfDayCount ?? 0} Days
+                </span>
+              </div>
+
+              <div className="p-4 bg-indigo-50 border border-indigo-100 rounded-2xl">
+                <CalendarCheck size={24} className="text-indigo-600 mx-auto mb-1" />
+                <span className="text-xs text-slate-500 font-medium block">On Leave</span>
+                <span className="text-2xl font-extrabold text-indigo-700 font-mono">
+                  {attendanceSummary?.leaveCount ?? 0} Days
+                </span>
+              </div>
             </div>
-            <div className="text-center text-xs text-slate-400 font-semibold py-1">
-              Coming in Stage 7
-            </div>
-          </div>
-        </Card>
+          </Card>
+        </div>
       </div>
+
+      {/* Grid Row 2: Leave Balances */}
+      <div className="space-y-3">
+        <h3 className="text-base font-extrabold text-slate-900 tracking-tight">Time Off Allocations</h3>
+        <LeaveBalanceCards balances={leaveBalances} />
+      </div>
+
+      {/* Grid Row 3: Salary Summary & Upcoming Approved Leave */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2 space-y-3">
+          <h3 className="text-base font-extrabold text-slate-900 tracking-tight">Current Take-Home Salary</h3>
+          {salaryInfo ? (
+            <SalarySummaryCard
+              grossSalary={salaryInfo.grossSalary}
+              totalDeductions={salaryInfo.totalDeductions}
+              netSalary={salaryInfo.netSalary}
+            />
+          ) : (
+            <div className="p-6 bg-white border border-slate-200 rounded-2xl text-center text-xs text-slate-500">
+              No active salary structure configured yet.
+            </div>
+          )}
+        </div>
+
+        <div className="lg:col-span-1">
+          <Card title="Upcoming Approved Leave">
+            {upcomingLeave.length === 0 ? (
+              <p className="text-xs text-slate-400 italic py-4 text-center">No upcoming approved leave scheduled.</p>
+            ) : (
+              <div className="space-y-3">
+                {upcomingLeave.map((l) => (
+                  <div key={l.id} className="p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs space-y-1">
+                    <div className="flex justify-between items-center font-bold text-slate-900">
+                      <span className="uppercase text-indigo-700">{l.leaveType} LEAVE</span>
+                      <span className="font-mono text-indigo-900">{l.duration} Days</span>
+                    </div>
+                    <p className="text-slate-500 font-mono text-[11px]">
+                      {formatDate(l.startDate)} → {formatDate(l.endDate)}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </Card>
+        </div>
+      </div>
+
+      {/* Grid Row 4: Recent Payroll Snapshot */}
+      {recentPayroll && (
+        <Card title="Latest Payroll Statement">
+          <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-4 text-xs">
+            <div className="flex items-center gap-3">
+              <div className="p-3 bg-indigo-100 text-indigo-700 rounded-xl">
+                <FileText size={20} />
+              </div>
+              <div>
+                <p className="font-bold text-slate-900">
+                  Pay Period: {formatDate(recentPayroll.payPeriodStart)} – {formatDate(recentPayroll.payPeriodEnd)}
+                </p>
+                <p className="text-slate-500">Generated on {formatDate(recentPayroll.generatedAt)}</p>
+              </div>
+            </div>
+            <div className="text-right">
+              <span className="text-[10px] uppercase font-semibold text-slate-400 block">Net Salary</span>
+              <span className="text-base font-extrabold text-emerald-700 font-mono">
+                {formatCurrency(recentPayroll.netSalary)}
+              </span>
+            </div>
+          </div>
+        </Card>
+      )}
     </div>
   );
 };

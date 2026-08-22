@@ -50,6 +50,16 @@ enum LeaveStatus {
   REJECTED
 }
 
+enum NotificationType {
+  LEAVE_SUBMITTED
+  LEAVE_APPROVED
+  LEAVE_REJECTED
+  SALARY_UPDATED
+  PAYROLL_GENERATED
+  ATTENDANCE_UPDATED
+  SYSTEM
+}
+
 // ==========================================
 // MODELS
 // ==========================================
@@ -93,6 +103,7 @@ model User {
   passwordResetTokens   PasswordResetToken[]
   reviewedLeaveRequests LeaveRequest[]           @relation("ReviewedLeaves")
   auditLogs             AuditLog[]
+  notifications         Notification[]
 
   @@unique([companyId, email])
   @@index([companyId, role, isActive])
@@ -344,4 +355,20 @@ model AuditLog {
   user    User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   @@index([companyId, userId, entityType, entityId, createdAt])
+}
+
+model Notification {
+  id        String           @id @default(uuid())
+  userId    String
+  type      NotificationType
+  title     String
+  message   String
+  isRead    Boolean          @default(false)
+  linkUrl   String?
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isRead, createdAt])
 }

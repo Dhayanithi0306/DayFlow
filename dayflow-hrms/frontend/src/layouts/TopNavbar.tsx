@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useNotifications } from '../context/NotificationContext';
 import { Avatar } from '../components/common/Avatar';
 import { Modal } from '../components/common/Modal';
 import { Badge } from '../components/common/Badge';
+import { formatDate } from '../utils/formatters';
 import {
   Menu,
   Bell,
@@ -13,6 +15,7 @@ import {
   LogOut,
   ChevronDown,
   Inbox,
+  CheckCheck,
 } from 'lucide-react';
 
 export interface TopNavbarProps {
@@ -21,10 +24,16 @@ export interface TopNavbarProps {
 
 export const TopNavbar: React.FC<TopNavbarProps> = ({ onMenuClick }) => {
   const { user, logout } = useAuth();
+  const { unreadCount, notifications, fetchNotifications, markRead, markAllRead } = useNotifications();
   const navigate = useNavigate();
 
   const [menuOpen, setMenuOpen] = useState<boolean>(false);
   const [notificationsOpen, setNotificationsOpen] = useState<boolean>(false);
+
+  const handleOpenNotifications = () => {
+    fetchNotifications();
+    setNotificationsOpen(true);
+  };
 
   const handleLogout = () => {
     logout();
@@ -55,7 +64,7 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({ onMenuClick }) => {
           <Menu size={20} />
         </button>
 
-        {/* Global Search Input Placeholder */}
+        {/* Global Search Input */}
         <div className="relative hidden sm:block max-w-xs w-64">
           <Search size={16} className="absolute left-3 top-2.5 text-slate-400 pointer-events-none" />
           <input
@@ -68,14 +77,18 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({ onMenuClick }) => {
 
       {/* Right Actions: Notifications & User Profile Menu */}
       <div className="flex items-center gap-3">
-        {/* Notifications Icon */}
+        {/* Notifications Icon & Unread Count Badge */}
         <button
-          onClick={() => setNotificationsOpen(true)}
+          onClick={handleOpenNotifications}
           title="Notifications"
           className="p-2 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-colors relative cursor-pointer"
         >
           <Bell size={20} />
-          <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-indigo-600 rounded-full" />
+          {unreadCount > 0 && (
+            <span className="absolute top-1 right-1 px-1.5 py-0.5 text-[10px] font-extrabold bg-rose-500 text-white rounded-full leading-none">
+              {unreadCount > 9 ? '9+' : unreadCount}
+            </span>
+          )}
         </button>
 
         {/* Notifications Modal */}
@@ -83,14 +96,70 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({ onMenuClick }) => {
           isOpen={notificationsOpen}
           onClose={() => setNotificationsOpen(false)}
           title="Notifications"
-          maxWidth="sm"
+          maxWidth="md"
         >
-          <div className="text-center py-8 space-y-3">
-            <div className="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center mx-auto text-slate-400">
-              <Inbox size={24} />
+          <div className="space-y-3">
+            <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+              <span className="text-xs text-slate-500 font-medium">
+                {unreadCount > 0 ? `${unreadCount} unread notification(s)` : 'All caught up'}
+              </span>
+              {unreadCount > 0 && (
+                <button
+                  onClick={markAllRead}
+                  className="text-xs text-indigo-600 font-bold hover:underline flex items-center gap-1 cursor-pointer"
+                >
+                  <CheckCheck size={14} /> Mark all as read
+                </button>
+              )}
             </div>
-            <p className="text-sm font-semibold text-slate-800">No new notifications</p>
-            <p className="text-xs text-slate-500">You're all caught up! Workday updates will appear here.</p>
+
+            {notifications.length === 0 ? (
+              <div className="text-center py-8 space-y-3">
+                <div className="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center mx-auto text-slate-400">
+                  <Inbox size={24} />
+                </div>
+                <p className="text-sm font-semibold text-slate-800">No notifications yet</p>
+                <p className="text-xs text-slate-500">Workday alerts and HR status updates will appear here.</p>
+              </div>
+            ) : (
+              <div className="divide-y divide-slate-100 max-h-80 overflow-y-auto">
+                {notifications.map((n) => (
+                  <div
+                    key={n.id}
+                    onClick={() => {
+                      if (!n.isRead) markRead(n.id);
+                      if (n.linkUrl) {
+                        setNotificationsOpen(false);
+                        navigate(n.linkUrl);
+                      }
+                    }}
+                    className={`p-3 rounded-xl transition-colors cursor-pointer flex items-start gap-3 ${
+                      !n.isRead ? 'bg-indigo-50/60 border-l-4 border-indigo-600' : 'hover:bg-slate-50'
+                    }`}
+                  >
+                    <div className="flex-1 min-w-0">
+                      <p className={`text-xs font-bold ${!n.isRead ? 'text-indigo-950' : 'text-slate-900'}`}>
+                        {n.title}
+                      </p>
+                      <p className="text-xs text-slate-600 mt-0.5 line-clamp-2">{n.message}</p>
+                      <span className="text-[10px] text-slate-400 font-mono mt-1 block">
+                        {formatDate(n.createdAt)}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <div className="pt-3 border-t border-slate-100 text-center">
+              <Link
+                to="/notifications"
+                onClick={() => setNotificationsOpen(false)}
+                className="text-xs font-bold text-indigo-600 hover:underline"
+              >
+                View All Notifications Center →
+              </Link>
+            </div>
           </div>
         </Modal>
 
